@@ -1,0 +1,15 @@
+[Unit]
+Description=Warm Claude daemon for Robot-DS (fast, stateless Claude calls over a unix socket)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Environment=HOME=/home/ubuntu
+Environment=PATH=/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/python3 -u /home/ubuntu/ros2_ws/claude_daemon.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

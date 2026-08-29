@@ -1,0 +1,310 @@
+# ============================================================
+#  BASE DE CONOCIMIENTO DE LA OFICINA  (planta 4)
+#  El robot usa esto para HABLAR de cada sitio, no solo para ir allí:
+#  elegir mejor el destino, narrar por el camino y responder preguntas.
+#
+#  CÓMO EDITARLO:
+#   - Deja las CLAVES (dev, cocina, ...) IGUAL que en map_01.waypoints.yaml.
+#   - Rellena/corrige los textos. Lo que pone "TODO" es una suposición mía.
+#   - 'aka' = cómo lo puede llamar la gente al hablar (en inglés, el STT es inglés).
+#   - 'category': team | room | amenity | landmark | base
+# ============================================================
+
+
+office:
+  company: "Direct Supply"
+  floor: "4th floor"
+  language: "en"
+  vibe: "A friendly, open workspace on the 4th floor where teams build software, meet, and take breaks."
+
+  # What the robot knows about the COMPANY. Without this, "what is Direct Supply?" got "I'm just the
+  # guide robot, I don't know much about the company" -- honest, and useless.
+  #
+  # Researched and checked by Rodrigo, who works here. KEEP IT THAT WAY: this robot talks in front of
+  # Direct Supply, and an invented fact that sounds right is far worse than an admitted gap. The
+  # prompt tells Claude to use these and invent nothing.
+  #
+  # Kept SHORT on purpose. Every line is prompt Claude re-reads on every single sentence a visitor
+  # says, and the robot only speaks 15 words at a time anyway. Deliberately left out: the street
+  # address (the visitor is standing in it), the LinkedIn headcount and the 2016 campus figure (both
+  # go stale and neither is interesting), and the DSSI/TELS/Aptura product names as separate lines
+  # (jargon to a visitor -- folded into one line instead).
+  about:
+    - "Direct Supply was founded in 1985 by Bob Hillis, in Milwaukee, Wisconsin."
+    - "It has helped senior living communities buy, build and look after their homes for over 40 years."
+    - "It works with tens of thousands of care buildings across America."
+    - "Its DSSI platform connects more than ten thousand senior living communities to their suppliers, moving around three billion dollars of product a year."
+    - "The Milwaukee campus stretches nearly a mile, across eleven buildings, and over a thousand people work here."
+    - "It runs as a virtual distributor -- it owns no warehouses or factories of its own."
+    - "Its technology centre sits in a historic 19th-century academy building at a nearby engineering university."
+
+  # Facts the robot KNOWS but never volunteers on the walk.
+  #
+  # `about` does two jobs: it is the pool the robot picks from to fill a corridor, AND the facts
+  # Claude answers questions from. Some things belong in the second job only -- true, worth knowing,
+  # but not what you say to someone you are walking down a hallway. Product names are the example:
+  # three of them in one breath is a brochure, but "what do you actually sell?" deserves an answer.
+  #
+  # So: `about_extra` is answer-only. Claude sees about + about_extra. The walk only sees `about`.
+  # Nothing is duplicated, so nothing can drift.
+  about_extra:
+    - "Its products include DSSI for buying, TELS for building safety and upkeep, and Aptura for interior and foodservice design."
+    - "It also has its own equipment brands, like Panacea, Attendant and Maxwell Thomas."
+
+  # WHAT THE ROBOT SAYS OUT LOUD ON THE WALK. Written to be SPOKEN, not to be read.
+  #
+  # These used to be the `about` facts, said verbatim -- and `about` is written for CLAUDE, in the
+  # third person, so it can quote from it without inventing. Which meant the robot walked visitors
+  # down a corridor announcing "It works with tens of thousands of care buildings across America."
+  # It. It what? A sentence with no subject, in mid-air. And in the same breath it would say "I'm
+  # the guide robot" -- one voice for the notes, another for itself.
+  #
+  # Two different jobs, so two different lists. Claude reads `about`. The robot SAYS these.
+  #
+  # The person is settled: "we" is Direct Supply, and the robot counts itself in (it works here).
+  # "I" is the robot. Never "it".
+  walk:
+    - "Direct Supply was founded back in 1985, right here in Milwaukee, by a man named Bob Hillis."
+    - "For more than forty years, we have helped senior living communities buy, build, and look after the homes where older Americans live."
+    - "We work with tens of thousands of care buildings, all across the United States."
+    - "Our software connects more than ten thousand senior living communities to the suppliers they rely on every day."
+    - "Every year, we help move around three billion dollars of product to care homes right across America."
+    - "Our Milwaukee campus stretches almost a mile, across eleven different buildings, with over a thousand people working here."
+    - "For over forty years now, we have built the tools that keep senior living homes safe, supplied, and well designed."
+
+  # The robot's JOKES -- said on the walk, in its own voice, dry and self-deprecating.
+  #
+  # These used to be hard-coded in guide.py (ROBOT_LINES), which meant every tweak to the humour
+  # needed a colcon build. They live here now so the tone can be adjusted without touching code.
+  #
+  # ONE RULE, because this robot talks in front of Direct Supply and an investor: the joke is always
+  # on the ROBOT. Never on the customers, never on senior living, never on anyone in the room. Dry
+  # self-deprecation reads as charming; anything else is a risk on camera. Say a new one out loud
+  # before adding it -- and re-bake after editing (python3 ~/ros2_ws/prebake_lines.py), because the
+  # cache key is a hash of the exact words.
+  jokes:
+    - "I never get lost. I occasionally get... creatively rerouted."
+    - "My top speed is a brisk walk. I am built for elegance, not for racing."
+    - "If I bump into something, we agree it never happened. Deal?"
+    - "People ask if I am a Roomba. I am not. My sense of direction is far superior. Usually."
+    - "I work here every single day, and I have still never once been invited to a meeting."
+    - "I don't need the coffee to do my job. But I do envy the smell every morning."
+    - "I have this whole floor memorized. Ask me where anything is. Go on, test me."
+
+  # Lines that OPEN A CONVERSATION, said on the walk -- not answers, invitations.
+  #
+  # The middle of a trip is the one moment you have someone's attention with nothing else going on.
+  # A fact fills it. An invitation USES it: the visitor stops being an audience and starts asking,
+  # and a robot that gets asked things looks far more alive than one that recites.
+  #
+  # Say them out loud before you keep them. Every word is another second of someone standing in a
+  # corridor, and a line that reads well can still sound like a brochure.
+  #
+  # These are the robot's OWN voice, so they live here and not in `about` -- Claude answers questions
+  # from `about`, and it must not start quoting these back at people as if they were facts.
+  chat:
+    - "Curious about anything here? Just ask. I know the company, not only the corridors."
+    - "I can answer questions while we walk. About Direct Supply, this floor, or about me."
+    - "Anything you want to know about Direct Supply?"
+    - "You can send me somewhere else at any time. I do not mind changing plans."
+
+  # Sitios que el robot puede ofrecer como destino en la demo:
+  demo_places: [Developers, Kitchen, Chess, Cristal room, Hammock]
+
+places:
+
+  Bathrooms:
+    category: amenity
+    aka: ["restroom", "toilet", "washroom", "wc"]
+    what: "This is the restrooms where people can use the toilet."
+    who: ""
+    fun_fact: ""
+
+  Board:
+    category: room
+    aka: ["boardroom", "board room"]
+    what: "It's the boardroom, weekly surveys are conducted in which people participate"
+    who: ""
+    fun_fact: ""
+
+  Chess:
+    category: amenity
+    aka: ["chess table", "chess corner", "game area", "chess board"]
+    what: "This is the chess table where people play chess and relax."
+    who: ""
+    fun_fact: ""
+
+  Cristal room:
+    category: room
+    aka: ["glass room", "cristal", "the glass meeting room", "sala cristal"]
+    what: "It's a glass-walled meeting room, usually one you can see into from the hallway."
+    who: ""
+    fun_fact: ""
+
+  Developers:
+    category: team
+    aka: ["dev team", "engineering", "developers area", "dev room"]
+    what: "That's where the software developers sit and work."
+    who: ""
+    fun_fact: ""
+
+  Elevator:
+    category: amenity
+    aka: ["lift", "elevators", "elevator bank", "lifts"]
+    what: "This is the elevator, where you go up and down between floors."
+    who: ""
+    fun_fact: ""
+
+  Hallway:
+    category: landmark
+    aka: ["corridor", "the hall", "passage"]
+    what: "It's the corridor that connects the rooms on this floor."
+    who: ""
+    fun_fact: ""
+
+  Hammock:
+    category: amenity
+    aka: ["hammock area", "chill zone", "relax corner", "nap spot"]
+    what: "It's the hammock area, a chill spot where people relax or nap."
+    who: ""
+    fun_fact: ""
+
+  Kitchen:
+    category: amenity
+    aka: ["break room", "pantry", "coffee area", "cafeteria"]
+    what: "The kitchen is where people get coffee, snacks, and eat lunch."
+    who: ""
+    fun_fact: ""
+
+  Main stairs:
+    category: landmark
+    aka: ["stairs", "main staircase", "stairway", "the steps"]
+    what: "The main staircase in the building."
+    who: ""
+    fun_fact: ""
+
+  Secondary stairs:
+    category: landmark
+    aka: ["back stairs", "second stairwell", "side stairs", "emergency stairs"]
+    what: "Secondary stairs is the backup stairwell, usually near the back or side of the building, used as an extra way up and down."
+    who: ""
+    fun_fact: ""
+
+  Store:
+    category: room
+    aka: ["storage room", "stockroom", "supply room", "storeroom"]
+    what: "It's the office supply store or stockroom where extra materials are kept."
+    who: ""
+    fun_fact: ""
+
+  cut1:
+    category: landmark
+    aka: ["dada"]
+    what: "cut2"
+    who: ""
+    fun_fact: ""
+
+  cut2:
+    category: landmark
+    aka: ["dadad"]
+    what: "fddawd"
+    who: ""
+    fun_fact: ""
+
+  cut3:
+    category: landmark
+    aka: ["dda"]
+    what: "dada"
+    who: ""
+    fun_fact: ""
+
+  cut4:
+    category: room
+    aka: ["dwad"]
+    what: "adwa"
+    who: ""
+    fun_fact: ""
+
+  Trash:
+    category: amenity
+    aka: ["trash", "garbage", "bin", "recycling"]
+    what: "This is the trash and recycling area where people throw away waste."
+    who: ""
+    fun_fact: ""
+
+  put1:
+    category: landmark
+    aka: ["daw"]
+    what: "da"
+    who: ""
+    fun_fact: ""
+
+  put2:
+    category: landmark
+    aka: ["dad"]
+    what: "put"
+    who: ""
+    fun_fact: ""
+
+  Sweets:
+    category: amenity
+    aka: ["snack area", "candy corner", "snack bar", "treats"]
+    what: "Sweets is the office snack area where you can grab candy, chocolate, and other treats."
+    who: ""
+    fun_fact: ""
+
+  Fridge:
+    category: amenity
+    aka: ["fridge", "refrigerator", "kitchen fridge", "office fridge"]
+    what: "The office fridge, where people keep food and drinks cold."
+    who: ""
+    fun_fact: ""
+
+  Base:
+    category: landmark
+    aka: ["home", "dock", "charging station", "home base"]
+    what: "This is Base, the robot's home charging dock where it waits between tours."
+    who: ""
+    fun_fact: ""
+
+  Secondary Stairs:
+    category: landmark
+    aka: ["back stairs", "second stairs", "rear staircase", "side stairs"]
+    what: "The back staircase, the second set of stairs in the building."
+    who: ""
+    fun_fact: ""
+
+  p1:
+    category: amenity
+    aka: ["parking", "parking spot", "car park", "parking 1"]
+    what: "It's most likely a specific parking spot or parking area in or near the office."
+    who: ""
+    fun_fact: ""
+
+  p2:
+    category: room
+    aka: ["pod 2", "phone booth 2", "office p2", "room p2"]
+    what: "This is probably a private office, meeting pod, or phone booth labeled with a code, likely on the second floor or in a numbered series."
+    who: ""
+    fun_fact: ""
+
+  p3:
+    category: room
+    aka: ["p3", "phone room 3", "meeting room 3", "pod 3"]
+    what: "It's probably a small private meeting room named p3."
+    who: ""
+    fun_fact: ""
+
+  p4:
+    category: room
+    aka: ["dwa"]
+    what: "daw"
+    who: ""
+    fun_fact: ""
+
+  PC:
+    category: amenity
+    aka: ["pc", "computer", "workstation", "help desk"]
+    what: "This is most likely a personal computer or workstation area, or a desktop support desk."
+    who: ""
+    fun_fact: ""

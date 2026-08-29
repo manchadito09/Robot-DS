@@ -1,0 +1,2 @@
+# Face models: 37 MB of binary that never changes. Fetch with models/get_face_models.sh
+*.onnx

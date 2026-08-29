@@ -1,0 +1,13 @@
+# Voice pipeline dependencies (Python 3.10). Create a venv and:  pip install -r requirements.txt
+# STT (local, offline once the model is cached)
+faster-whisper==1.2.1
+ctranslate2==4.8.0
+# audio capture / files
+sounddevice==0.5.5
+soundfile==0.14.0
+numpy==2.2.6
+# wake word (hands-free) — uses onnxruntime
+openwakeword==0.6.0
+onnxruntime==1.23.2
+# NOTE: TTS (Piper) is a standalone binary, not a pip package.
+#       Run  ./setup_piper.sh  to download it + the voice model.

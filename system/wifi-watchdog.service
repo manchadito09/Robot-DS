@@ -1,0 +1,7 @@
+[Unit]
+Description=Keep the robot on the office WiFi (Hiwonder's wifi.service wipes the profiles at boot)
+After=NetworkManager.service wifi.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/ubuntu/wifi_manager/wifi_watchdog.sh

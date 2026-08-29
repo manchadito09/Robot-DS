@@ -1,0 +1,10 @@
+# Python virtualenv and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Recorded audio. The mic dumps into these while the robot listens, so they hold
+# whatever the last person said. Never commit them.
+*.wav
+# ...except the wake-word beep, which is an asset the robot needs to run.
+!beep.wav

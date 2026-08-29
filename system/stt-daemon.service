@@ -1,0 +1,14 @@
+[Unit]
+Description=Warm Whisper daemon for Robot-DS (speech-to-text without the 2.9s model load per message)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Robot-DS/voice_prototype
+ExecStart=/home/ubuntu/Robot-DS/voice_prototype/.venv/bin/python /home/ubuntu/Robot-DS/voice_prototype/stt_daemon.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

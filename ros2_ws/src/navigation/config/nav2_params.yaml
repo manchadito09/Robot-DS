@@ -1,0 +1,503 @@
+amcl:
+  ros__parameters:
+    use_sim_time: False
+    alpha1: 0.2
+    alpha2: 0.2
+    alpha3: 0.2
+    alpha4: 0.2
+    alpha5: 0.2
+    base_frame_id: "base_footprint"
+    # BEAM SKIPPING ON -- this is the glass.
+    #
+    # Measured next to the Cristal room glass, robot standing still and facing it: of the beams that
+    # came back at all, only 31% landed on a wall the map knows about; 48% landed in what the map
+    # calls open floor, a median 0.39 m from anything. Facing an ordinary wall, from the same robot
+    # minutes earlier: 99.7% explained, 5 cm median. And only 130 beams returned at the glass versus
+    # 310 at the wall -- HALF the beams simply never come back.
+    #
+    # A lidar shoots straight through glass. The beams that survive land somewhere inside the room
+    # beyond it, where the map says empty floor, and AMCL reads "these beams don't fit -- I must not
+    # be where I think I am" and slides. Which is exactly what we saw: mislocalized, always at the
+    # same spot, then straight into the glass, because the static_layer wall it was avoiding had
+    # slid with it.
+    #
+    # Beam skipping is AMCL's built-in answer: beams that most particles find inconsistent with the
+    # map get dropped from the update instead of dragging the estimate around. The glass beams get
+    # ignored; the ones hitting real walls still do their job.
+    beam_skip_distance: 0.5
+    beam_skip_error_threshold: 0.9
+    beam_skip_threshold: 0.3
+    do_beamskip: true
+    global_frame_id: "map"
+    lambda_short: 0.1
+    laser_likelihood_max_dist: 2.0
+    laser_max_range: 10.0
+    laser_min_range: 0.2
+    # "..._prob", not plain "likelihood_field". Beam skipping (below) is the whole point, and in
+    # nav2_amcl (amcl_node.cpp:1030) do_beamskip is ONLY passed to the sensor model when the type is
+    # "likelihood_field_prob". With plain "likelihood_field" the flag is read, stored, and silently
+    # ignored -- the switch is not wired to anything.
+    laser_model_type: "likelihood_field_prob"
+    max_beams: 60
+    max_particles: 5000
+    min_particles: 1500
+    odom_frame_id: "odom"
+    pf_err: 0.05
+    pf_z: 0.99
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
+    resample_interval: 1
+    robot_model_type: "nav2_amcl::DifferentialMotionModel"
+    save_pose_rate: 0.5
+    sigma_hit: 0.2
+    tf_broadcast: true
+    transform_tolerance: 1.0
+    update_min_a: 0.05
+    update_min_d: 0.1
+    z_hit: 0.5
+    z_max: 0.05
+    z_rand: 0.5
+    z_short: 0.05
+    scan_topic: scan
+    set_initial_pose: True
+    initial_pose: 
+      x: 0.0
+      y: 0.0
+      yaw: 0.0
+
+amcl_map_client:
+  ros__parameters:
+    use_sim_time: False
+
+amcl_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: False
+    global_frame: map
+    robot_base_frame: base_footprint
+    odom_topic: /odom
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    #enable_groot_monitoring: True
+    #groot_zmq_publisher_port: 1666
+    #groot_zmq_server_port: 1667
+    # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
+    # nav2_bt_navigator/navigate_to_pose_w_replanning_and_recovery.xml
+    # nav2_bt_navigator/navigate_through_poses_w_replanning_and_recovery.xml
+    # They can be set here or via a RewrittenYaml remap from a parent launch file to Nav2.
+    plugin_lib_names:
+      - nav2_compute_path_to_pose_action_bt_node
+      - nav2_compute_path_through_poses_action_bt_node
+      - nav2_smooth_path_action_bt_node
+      - nav2_follow_path_action_bt_node
+      - nav2_spin_action_bt_node
+      - nav2_wait_action_bt_node
+      - nav2_assisted_teleop_action_bt_node
+      - nav2_back_up_action_bt_node
+      - nav2_drive_on_heading_bt_node
+      - nav2_clear_costmap_service_bt_node
+      - nav2_is_stuck_condition_bt_node
+      - nav2_goal_reached_condition_bt_node
+      - nav2_goal_updated_condition_bt_node
+      - nav2_globally_updated_goal_condition_bt_node
+      - nav2_is_path_valid_condition_bt_node
+      - nav2_initial_pose_received_condition_bt_node
+      - nav2_reinitialize_global_localization_service_bt_node
+      - nav2_rate_controller_bt_node
+      - nav2_distance_controller_bt_node
+      - nav2_speed_controller_bt_node
+      - nav2_truncate_path_action_bt_node
+      - nav2_truncate_path_local_action_bt_node
+      - nav2_goal_updater_node_bt_node
+      - nav2_recovery_node_bt_node
+      - nav2_pipeline_sequence_bt_node
+      - nav2_round_robin_node_bt_node
+      - nav2_transform_available_condition_bt_node
+      - nav2_time_expired_condition_bt_node
+      - nav2_path_expiring_timer_condition
+      - nav2_distance_traveled_condition_bt_node
+      - nav2_single_trigger_bt_node
+      - nav2_goal_updated_controller_bt_node
+      - nav2_is_battery_low_condition_bt_node
+      - nav2_navigate_through_poses_action_bt_node
+      - nav2_navigate_to_pose_action_bt_node
+      - nav2_remove_passed_goals_action_bt_node
+      - nav2_planner_selector_bt_node
+      - nav2_controller_selector_bt_node
+      - nav2_goal_checker_selector_bt_node
+      - nav2_controller_cancel_bt_node
+      - nav2_path_longer_on_approach_bt_node
+      - nav2_wait_cancel_bt_node
+      - nav2_spin_cancel_bt_node
+      - nav2_back_up_cancel_bt_node
+      - nav2_assisted_teleop_cancel_bt_node
+      - nav2_drive_on_heading_cancel_bt_node
+      - nav2_is_battery_charging_condition_bt_node
+
+bt_navigator_navigate_through_poses_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+bt_navigator_navigate_to_pose_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      global_frame: odom
+      robot_base_frame: base_footprint
+      use_sim_time: False
+      rolling_window: true
+      width: 3
+      height: 3
+      resolution: 0.05
+      robot_radius: 0.16
+      # static_layer FIRST -- and this is what stops the robot driving into GLASS.
+      #
+      # No sensor on this robot can see glass: the lidar goes straight through it, and so does the
+      # depth camera's infrared. The ONLY record that a glass wall exists is the map (it got mapped
+      # because there were cardboard boxes in front of it at the time).
+      #
+      # The global costmap already had static_layer, so the PLANNER routed around the glass. But the
+      # local costmap did not, so TEB -- the thing that actually turns the wheels -- saw open floor
+      # there and cut the corner straight into it. Planner polite, driver blind. That is exactly how
+      # the robot hit the Cristal room glass on a Secondary stairs -> Chess trip.
+      #
+      # Cost of this: the map's walls now appear in the local costmap, so if AMCL drifts they land
+      # in the wrong place and the robot dodges a phantom. That was a real fear while AMCL was
+      # teleporting between rooms; it is not, now that the map has been redone and localization is
+      # stable. Worth it -- a phantom wall makes the robot swerve, glass makes it crash.
+      # camera_layer is BACK (it was out for a few hours on 14-jul). It had started marking the FLOOR
+      # as a wall -- 27 obstacles a scan on empty floor, against 14 from a healthy camera -- and
+      # because it never clears its marks (below), the robot painted a cage around itself and stopped
+      # dead in open floor. The cause was mine: I had turned the camera's IR stream off that morning,
+      # to free USB bandwidth, on the grounds that "nothing reads /depth_cam/ir/*". True, and
+      # irrelevant: the IR projector is HOW THIS CAMERA MEASURES DEPTH. Without it the depth degraded,
+      # the floor-plane fit drifted, and the floor came back as an obstacle. IR back on -> 13 hits on
+      # empty floor, clean. Never turn it off again.
+      #
+      # It is in the LOCAL costmap only. The global one is where its marks rot: camera_layer has
+      # clearing: False (deliberately -- see below) and the global costmap never forgets, so every
+      # false positive and every passer-by stayed there for the life of the run. The local costmap is
+      # a 3 m rolling window that flushes itself as the robot moves.
+      plugins: ["static_layer", "voxel_layer", "camera_layer", "denoise_layer", "inflation_layer"]
+      denoise_layer:
+        plugin: "nav2_costmap_2d::DenoiseLayer"
+        # TEST 12-jul: OFF. It wipes obstacle islands smaller than minimal_group_size, and a
+        # chair leg is ~1 cell at 5 cm resolution -> it was erasing every camera mark.
+        enabled: False
+        minimal_group_size: 3
+        group_connectivity_type: 8
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.20
+      voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        enabled: True
+        publish_voxel_map: False
+        origin_z: 0.0
+        z_resolution: 0.05
+        z_voxels: 16
+        max_obstacle_height: 2.0
+        mark_threshold: 0
+        observation_sources: scan
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+      # The depth camera gets its OWN layer, NOT the lidar's. Sharing a layer did not work: the lidar
+      # beam (16.8 cm) passes OVER a chair leg and hits the wall behind, so its raytrace-clearing
+      # wiped the camera's mark as fast as the camera made it -- the robot saw the leg, forgot it,
+      # and clipped it. In a layer of its own nothing else can erase these marks.
+      #
+      # CLEARING IS ON NOW, and this is the fix for the robot freezing in open floor and never
+      # moving again. It used to be off, so the camera could mark but never unmark. Then: the robot
+      # hesitates, Nav2's recovery spins it on the spot, the camera sweeps a full circle marking as
+      # it goes, and none of it ever expires -- it paints a cage around itself, and the harder it
+      # fights the more it spins and the more it paints. costmap_view.py caught it red-handed: 59%
+      # of the local costmap lethal, walls pressed against the robot, and the map and the lidar both
+      # saying open floor.
+      #
+      # raytrace_min_range 0.5 is what makes clearing safe: the camera never erases anything closer
+      # than 50 cm. That is its blind spot -- exactly where the chair leg it is closing in on ends
+      # up. Without this, a leg that drops out of view at close range gets raytraced away by the
+      # "no return" ray passing through it, which is the bug clearing: False was hiding from.
+      #   beyond 50 cm -> the camera may unmark what it can now see is clear (kills the ghosts)
+      #   inside 50 cm -> the mark stands, whatever the camera thinks (keeps the legs)
+      camera_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: camera_scan
+        camera_scan:
+          topic: /camera_scan
+          # camera_scan is a 2D LaserScan at floor level (z=0); the node already filtered
+          # obstacle HEIGHT, so do NOT re-filter by z here or every ray is dropped
+          # (min_obstacle_height > 0 discards the z=0 scan -> the layer never marks).
+          max_obstacle_height: 2.0
+          min_obstacle_height: -1.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 2.5
+          # 0.2, NOT 0.5. This one line built the cage, and the cage was caught on camera.
+          #
+          # The robot stopped dead in the middle of an open floor -- 8.9 m from the nearest map
+          # edge, AMCL verified correct to 9 cm -- and TEB said "trajectory is not feasible" for
+          # ever. costmap_view.py, run while it was stuck, showed why:
+          #
+          #     WHAT TEB SAW                  THE MAP AT THE SAME SPOT
+          #     ##############RR.#########    ...............R..........
+          #     ##############RR##########    ....#.....................
+          #     +##############.##########    ...............#..........
+          #
+          # Walled in, on both sides and BEHIND, in a room where Rodrigo -- standing next to it --
+          # could see nothing at all except some furniture a metre in front. The gap it had left
+          # itself was three cells wide: 30 cm, for a robot whose inflated radius is 36. It had
+          # strangled itself.
+          #
+          # Where the walls came from: the camera sees 90 degrees, forward. It marks what it sees.
+          # Then the robot turns, and those marks are now BESIDE it -- and no camera ray will ever
+          # pass through them again, so the layer can never take them back. Spin to recover, and it
+          # lays a fresh ring of them. The marks that trap it are the ones RIGHT AGAINST it, and
+          # with raytrace_min_range at 0.5 every one of those is immortal by construction.
+          #
+          # The fear that put 0.5 there was real but backwards: "the controller must not raytrace
+          # away the chair leg it is about to hit". It cannot. Clearing happens only where the
+          # camera SEES FREE SPACE. A leg still there is still seen, and still marked. 0.5 did not
+          # protect the leg -- it protected every ghost and every stale mark inside half a metre,
+          # and those are exactly the ones that stop the robot from moving at all.
+          #
+          # 0.2 matches camera_scan_node's RANGE_MIN: below that the scan reports nothing anyway,
+          # and 20 cm is inside the robot's own 16 cm body.
+          raytrace_min_range: 0.2
+          obstacle_max_range: 1.5
+          obstacle_min_range: 0.0
+          # MARKS EXPIRE AFTER 3 SECONDS, and this is the real fix for the cage that raytrace could
+          # only soften. The camera sees 90 degrees, forward. It marks a chair leg, the robot turns,
+          # and that mark is now BESIDE or BEHIND it, where no future ray will ever pass to clear it.
+          # Spin to recover and it lays a whole ring of them. Those marks are why the robot could not
+          # set off from a standing start -- "I couldn't reach Fridge" three times -- but arrived the
+          # moment it was nudged and the rolling window scrolled the stale marks out.
+          #
+          # observation_persistence expires every mark this many seconds after it was seen, whether
+          # or not a ray ever comes back to clear it. 3 s is long enough that a real leg 1.5 m ahead
+          # at 0.4 m/s is re-seen and re-marked twice before it expires, and short enough that the
+          # ghost ring a spin leaves behind is gone before the next goal. This is the LOCAL costmap
+          # only -- the controller's 3 m rolling window -- so a forgotten mark just gets re-marked
+          # the instant the camera sees the real obstacle again.
+          observation_persistence: 3.0
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True
+      always_send_full_costmap: True
+  local_costmap_rclcpp_node:
+    ros__parameters:
+      use_sim_time: False
+
+  local_costmap_client:
+    ros__parameters:
+      use_sim_time: False
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 1.0
+      publish_frequency: 1.0
+      global_frame: map
+      robot_base_frame: base_footprint
+      use_sim_time: False
+      robot_radius: 0.1
+      resolution: 0.05
+      track_unknown_space: true
+      # camera_layer is back here too, and it is what lets the robot REPLAN instead of giving up.
+      #
+      # It was pulled out because clearing: False made its marks immortal, and a global costmap never
+      # forgets: every false positive and every passer-by stayed for the life of the run, until the
+      # robot was refusing gaps it obviously fits through. That is fixed at the source now -- the
+      # layer clears (see the local costmap above), so its marks expire on their own.
+      #
+      # With it out, the PLANNER could not see low obstacles at all. So when a chair blocked the way,
+      # the planner kept happily insisting on a route straight through it while TEB, which could see
+      # it, refused to drive -- and the robot just sat there. It was not confused: it was following a
+      # plan nobody would let it execute. The planner has to know the chair is there to route around
+      # it.
+      plugins: ["static_layer", "obstacle_layer", "camera_layer", "denoise_layer", "inflation_layer"]
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: scan
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+      # Low obstacles (chair legs) go in the GLOBAL costmap too, so the PLANNER routes AROUND them
+      # instead of straight through. Without this the planner cannot see them at all, and when a
+      # chair blocks the way it keeps insisting on a route through it while TEB refuses to drive --
+      # the robot sits there, following a plan nobody will let it execute.
+      #
+      # Own layer, NOT the lidar's: sharing one meant the lidar's raytrace (its beam passes OVER the
+      # leg) cleared the camera's marks as fast as they appeared.
+      #
+      # Same clearing rules as the local costmap: clearing ON so marks expire (they used to be
+      # immortal here, and a global costmap never forgets -- it filled with ghosts until the robot
+      # refused gaps it obviously fits through), and raytrace_min_range 0.5 so the camera never
+      # erases anything inside its own blind spot, where the leg it is approaching ends up.
+      camera_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: camera_scan
+        camera_scan:
+          topic: /camera_scan
+          # camera_scan is a 2D LaserScan at floor level (z=0); the node already filtered
+          # obstacle HEIGHT, so do NOT re-filter by z here or every ray is dropped
+          # (min_obstacle_height > 0 discards the z=0 scan -> the layer never marks).
+          max_obstacle_height: 2.0
+          min_obstacle_height: -1.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 2.5
+          # 0.0 HERE, unlike the local costmap, and this is the difference between a global costmap
+          # that stays clean and one that slowly rots.
+          #
+          # The local one keeps 0.5: the CONTROLLER must not raytrace away the chair leg it is
+          # closing in on, once that leg drops into the camera's blind spot at close range.
+          #
+          # The PLANNER has no such problem -- it is drawing a thirty-metre route, not steering
+          # around something 20 cm from its wheels. But with 0.5 here, any mark the robot then drove
+          # up to became permanent (too close to clear) in a costmap that never forgets. They piled
+          # up wherever the robot had been, and the longer navigation had been running the more
+          # often it refused a perfectly open route. Intermittently -- which is the worst kind, and
+          # exactly what "sometimes it gets stuck, sometimes it doesn't" is.
+          raytrace_min_range: 0.0
+          obstacle_max_range: 1.5
+          obstacle_min_range: 0.0
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True
+      denoise_layer:
+        plugin: "nav2_costmap_2d::DenoiseLayer"
+        # TEST 12-jul: OFF, same reason as in the local costmap above.
+        enabled: False
+        minimal_group_size: 3
+        group_connectivity_type: 8
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 10.0
+        inflation_radius: 0.25
+      always_send_full_costmap: True
+  global_costmap_client:
+    ros__parameters:
+      use_sim_time: False
+  global_costmap_rclcpp_node:
+    ros__parameters:
+      use_sim_time: False 
+
+map_server:
+  ros__parameters:
+    use_sim_time: False
+    #topic_name: map
+    #frame_id: map
+    yaml_filename: ""
+
+map_saver:
+  ros__parameters:
+    use_sim_time: False
+    save_map_timeout: 5.0
+    free_thresh_default: 0.25
+    occupied_thresh_default: 0.65
+    map_subscribe_transient_local: True
+
+planner_server:
+  ros__parameters:
+    expected_planner_frequency: 20.0
+    use_sim_time: False
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      tolerance: 0.5
+      use_astar: false
+      allow_unknown: false   # never plan through unmapped/erased areas (the bad half of the floor)
+
+planner_server_rclcpp_node:
+  ros__parameters:
+    use_sim_time: False
+
+smoother_server:
+  ros__parameters:
+    use_sim_time: False
+    smoother_plugins: ["simple_smoother"]
+    simple_smoother:
+      plugin: "nav2_smoother::SimpleSmoother"
+      tolerance: 1.0e-10
+      max_its: 1000
+      do_refinement: True
+
+behavior_server:
+  ros__parameters:
+    costmap_topic: local_costmap/costmap_raw
+    footprint_topic: local_costmap/published_footprint
+    cycle_frequency: 10.0
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "assisted_teleop", "wait"]
+    spin:
+      plugin: "nav2_behaviors/Spin"
+    backup:
+      plugin: "nav2_behaviors/BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors/DriveOnHeading"
+    wait:
+      plugin: "nav2_behaviors/Wait"
+    assisted_teleop:
+      plugin: "nav2_behaviors/AssistedTeleop"
+    global_frame: odom
+    robot_base_frame: base_footprint
+    transform_tolerance: 0.1
+    use_sim_time: false
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0
+    min_rotational_vel: 0.4
+    rotational_acc_lim: 3.2
+
+waypoint_follower:
+  ros__parameters:
+    loop_rate: 20
+    stop_on_failure: false
+    waypoint_task_executor_plugin: "wait_at_waypoint"   
+    wait_at_waypoint:
+      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
+      enabled: True
+      waypoint_pause_duration: 200
+
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: False
+    smoothing_frequency: 20.0
+    scale_velocities: False
+    feedback: "OPEN_LOOP"
+    max_velocity: [0.5, 0.0, 1.5]
+    min_velocity: [-0.5, 0.0, -1.5]
+    max_accel: [1.0, 0.0, 2.0]
+    max_decel: [-1.0, 0.0, -2.0]
+    odom_topic: odom
+    odom_duration: 0.1
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Show QR (phone app)
+Comment=Show the QR code to open the robot web app on a phone
+Encoding=UTF-8
+Exec=bash /home/ubuntu/Robot-DS/robot_web/show_qr.sh
+Terminal=false
+MultipleArgs=false
+Type=Application
+Categories=Application;
+StartupNotify=true

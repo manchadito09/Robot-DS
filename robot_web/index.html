@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Wall-E</title>
+<style>
+  :root{
+    --bg1:#0a0f0c; --bg2:#0e1512; --card:#141d18; --ink:#f1f7f3; --muted:#a9c4b7;
+    --line:#233029; --line2:#2d3d34;
+    --brand:#22c55e; --brand2:#4ade80; --brand-ink:#4ade80;
+    --grad:linear-gradient(135deg,#22c55e,#16a34a);
+    --grad-soft:linear-gradient(135deg,#18271f,#142019);
+    --danger:#ef5350;
+    --shadow:0 16px 38px -18px rgba(0,0,0,.75);
+    --shadow-sm:0 8px 18px -10px rgba(0,0,0,.65);
+  }
+  :root{color-scheme:dark;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{color:var(--ink);font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
+       min-height:100vh;min-height:100dvh;line-height:1.45;
+       padding:calc(22px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
+               calc(90px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+       background:radial-gradient(760px 560px at 4% -12%,#14663d,transparent 60%),
+                  radial-gradient(680px 520px at 104% 2%,#0f4d3a,transparent 60%),
+                  radial-gradient(640px 560px at 50% 122%,#164a2e,transparent 62%),
+                  linear-gradient(160deg,var(--bg1),var(--bg2));
+       background-attachment:fixed;}
+  .app{max-width:720px;margin:0 auto;}
+
+  /* Header */
+  .head{display:flex;align-items:center;gap:15px;background:var(--card);border:1px solid var(--line);
+        border-radius:24px;padding:16px 20px;box-shadow:var(--shadow);margin-bottom:20px;}
+  .avatar{position:relative;width:56px;height:56px;border-radius:18px;background:var(--grad);display:flex;
+          align-items:center;justify-content:center;flex-shrink:0;
+          box-shadow:0 0 0 1px rgba(74,222,128,.35),0 0 22px -2px rgba(34,197,94,.55),var(--shadow-sm);}
+  .avatar svg{width:32px;height:32px;stroke:#08240f;}
+  .avatar .eye{fill:#eafff1;animation:eyeblink 3.6s infinite;}
+  @keyframes eyeblink{0%,92%,100%{opacity:1}95%{opacity:.15}}
+  .head .who{flex:1;} .head .name{font-size:23px;font-weight:800;letter-spacing:-.01em;}
+  .head .role{font-size:13px;color:var(--muted);}
+  .online{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:#4ade80;
+          background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.28);border-radius:20px;padding:6px 12px;}
+  .online .dot{width:8px;height:8px;border-radius:50%;background:#12b76a;
+               box-shadow:0 0 0 4px rgba(18,183,106,.18);animation:blink 2.4s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* Live status + health strip */
+  .statusbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;
+             border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:13px;}
+  .sb-doing{flex:1;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sb-doing.active{color:var(--brand2);}
+  .sb-health{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+  .sb-item{font-weight:800;font-size:12.5px;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .sb-item.warn{color:#fcd34d;} .sb-item.crit{color:#ff6b6b;}
+  .sb-dot{font-size:15px;opacity:.28;filter:grayscale(1);}
+  .sb-dot.on{opacity:1;filter:none;}
+
+  /* Single-controller lock banner */
+  .ctrlbar{display:none;align-items:center;gap:12px;margin-bottom:16px;padding:11px 15px;
+           border-radius:16px;font-size:13.5px;font-weight:600;
+           background:rgba(234,179,8,.13);border:1px solid rgba(234,179,8,.4);color:#fcd34d;}
+  .ctrlbar.show{display:flex;}
+  .ctrlbar button{margin-left:auto;flex-shrink:0;background:var(--grad);color:#fff;border:none;
+           border-radius:11px;padding:9px 15px;font-size:13px;font-weight:700;cursor:pointer;}
+
+  .screen{display:none;} .screen.active{display:block;animation:fade .22s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  /* Home tiles */
+  .menu{display:grid;grid-template-columns:1fr;gap:14px;}
+  .tile{text-align:left;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:22px;
+        padding:18px 20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;color:var(--ink);
+        transition:transform .12s,box-shadow .12s;}
+  .tile:hover{transform:translateY(-2px);box-shadow:0 20px 38px -20px rgba(20,45,70,.5);}
+  .tile:active{transform:scale(.99);}
+  .tile .t-ic{width:50px;height:50px;border-radius:15px;background:var(--grad-soft);flex-shrink:0;
+              display:flex;align-items:center;justify-content:center;}
+  .tile .t-ic svg{width:26px;height:26px;stroke:var(--brand-ink);}
+  .tile.c1 .t-ic{background:#123122;} .tile.c1 .t-ic svg{stroke:#22c55e;}
+  .tile.c2 .t-ic{background:#123122;} .tile.c2 .t-ic svg{stroke:#4ade80;}
+  .tile.c3 .t-ic{background:#123122;} .tile.c3 .t-ic svg{stroke:#34d399;}
+  .tile.c4 .t-ic{background:#123122;} .tile.c4 .t-ic svg{stroke:#86efac;}
+  .tile.c5 .t-ic{background:#123122;} .tile.c5 .t-ic svg{stroke:#10b981;}
+  .tile.c6 .t-ic{background:#123122;} .tile.c6 .t-ic svg{stroke:#5eead4;}
+  .tile.c7 .t-ic{background:#123122;} .tile.c7 .t-ic svg{stroke:#a3e635;}
+  .tile.c8 .t-ic{background:#123122;} .tile.c8 .t-ic svg{stroke:#2dd4bf;}
+  .tile h3{font-size:18px;font-weight:700;margin-bottom:2px;letter-spacing:-.01em;}
+  .tile p{font-size:13.5px;color:var(--muted);}
+  .tile .chev{margin-left:auto;color:#4b6156;font-size:26px;font-weight:300;}
+
+  .back{display:inline-flex;align-items:center;gap:4px;background:none;border:none;color:var(--brand-ink);
+        font-size:15px;font-weight:700;cursor:pointer;padding:6px 0;margin-bottom:6px;}
+  .sec-title{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:18px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow);}
+
+  .row{display:flex;gap:10px;}
+  input[type=text],select,textarea{flex:1;width:100%;background:#0f1713;border:1.5px solid var(--line2);
+        border-radius:14px;color:var(--ink);padding:15px 16px;font-size:16px;font-family:inherit;transition:.12s;}
+  input::placeholder,textarea::placeholder{color:#5c7367;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);background:#0d140f;
+        box-shadow:0 0 0 4px rgba(34,197,94,.16);}
+  .btn{border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;color:#fff;
+       background:var(--grad);padding:15px 22px;box-shadow:var(--shadow-sm);transition:.12s;}
+  .btn:active{transform:translateY(1px);filter:brightness(.97);}
+  .btn.block{width:100%;margin-top:14px;}
+  .btn.ghost{background:none;border:1.5px solid var(--line2);color:var(--muted);box-shadow:none;}
+  .btn.ghost:active{filter:none;}
+  .tour-actions{display:flex;gap:10px;margin-top:14px;}
+  .tour-summary{margin-top:14px;font-size:14px;font-weight:700;color:var(--brand-ink);line-height:1.5;}
+  .tour-summary.empty{color:var(--muted);font-weight:600;}
+
+  .places{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .place{position:relative;cursor:pointer;background:#111a15;border:1.5px solid var(--line2);color:var(--ink);
+         padding:26px 12px;border-radius:18px;font-size:17px;font-weight:700;text-transform:capitalize;
+         transition:.12s;text-align:center;box-shadow:var(--shadow-sm);}
+  .place:hover{border-color:var(--brand);} .place:active{background:var(--grad-soft);transform:scale(.97);}
+  .place.going{border-color:var(--brand);background:var(--grad-soft);box-shadow:0 0 0 2px var(--brand) inset;}
+  .place .go-tag{display:none;position:absolute;left:8px;top:8px;font-size:11px;font-weight:800;
+                 color:#fff;background:var(--brand);border-radius:8px;padding:2px 7px;letter-spacing:.02em;}
+  .place.going .go-tag{display:block;}
+  .place .del{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;background:#1a2620;
+              border:1px solid var(--line2);color:var(--muted);font-size:16px;line-height:1;display:flex;
+              align-items:center;justify-content:center;cursor:pointer;}
+  .place .del:active{background:var(--danger);border-color:var(--danger);color:#fff;}
+  .addbtn{width:100%;border:1.6px dashed var(--brand);background:var(--grad-soft);color:var(--brand-ink);
+          border-radius:16px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;}
+  .addform{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .sub-label{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;
+             letter-spacing:.05em;margin-bottom:12px;}
+  .hint{font-size:12.5px;color:var(--muted);line-height:1.4;}
+  .joint{margin-bottom:15px;}
+  .joint label{display:flex;justify-content:space-between;align-items:baseline;
+               font-size:14px;font-weight:600;color:var(--ink);margin-bottom:7px;}
+  .joint .jval{color:var(--brand2);font-weight:800;font-variant-numeric:tabular-nums;}
+  .joint input[type=range]{width:100%;height:30px;accent-color:var(--brand);cursor:pointer;}
+  .hidden{display:none;}
+
+  .voice{display:flex;flex-direction:column;align-items:center;gap:16px;padding:10px 0;}
+  .mic{width:118px;height:118px;border-radius:50%;border:none;cursor:pointer;background:var(--grad);color:#fff;
+       display:flex;align-items:center;justify-content:center;box-shadow:0 16px 34px -12px rgba(14,140,150,.7);user-select:none;}
+  .mic svg{width:46px;height:46px;} .mic.rec{background:var(--danger);animation:pulse 1.2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,91,71,.45);}100%{box-shadow:0 0 0 24px rgba(239,91,71,0);}}
+  .mic-label{font-size:15px;color:var(--muted);font-weight:600;}
+  .or{display:flex;align-items:center;gap:12px;color:#a9b5c1;font-size:13px;margin:18px 0 14px;}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line2);}
+
+  .pad{display:grid;grid-template-columns:repeat(3,86px);gap:12px;justify-content:center;}
+  .pad button{background:#111a15;border:1.5px solid var(--line2);color:var(--brand2);font-size:26px;font-weight:800;height:86px;
+              border-radius:20px;user-select:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+              box-shadow:var(--shadow-sm);}
+  .pad button:active{background:var(--grad);border-color:transparent;color:#06210f;transform:scale(.95);}
+  .pad .stop{background:#2a1614;border-color:#5a2b26;color:#ff8a80;font-size:14px;font-weight:800;}
+  .pad .stop:active{background:var(--danger);border-color:var(--danger);color:#fff;}
+  .pad .empty{visibility:hidden;}
+
+  .check{display:flex;align-items:center;gap:12px;padding:15px 16px;border:1.5px solid var(--line2);
+         border-radius:15px;margin-bottom:10px;font-size:16px;font-weight:700;text-transform:capitalize;cursor:pointer;transition:.12s;}
+  .check.on{border-color:var(--brand);background:var(--grad-soft);}
+  .check input{width:20px;height:20px;accent-color:var(--brand);}
+  .check .ord{display:none;min-width:24px;height:24px;padding:0 6px;border-radius:12px;
+              background:var(--brand);color:#fff;font-size:13px;font-weight:800;
+              align-items:center;justify-content:center;margin-left:auto;}
+  .check.on .ord{display:inline-flex;}
+
+  /* Map screen */
+  #modeGo,#modeAdd,#modeDel,#modeHere{flex:1;background:#111a15;border:1.5px solid var(--line2);color:var(--muted);box-shadow:none;padding:13px 6px;font-size:14px;}
+  #modeGo.on,#modeAdd.on{background:var(--grad);color:#fff;border-color:transparent;}
+  #modeDel.on{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;border-color:transparent;}
+  #modeHere.on{background:linear-gradient(135deg,#38bdf8,#0284c7);color:#fff;border-color:transparent;}
+  .mapwrap{position:relative;width:100%;border-radius:14px;overflow:hidden;background:#0e1512;
+           border:1.5px solid var(--line2);min-height:180px;touch-action:manipulation;}
+  .mapwrap img{display:block;width:100%;image-rendering:pixelated;image-rendering:crisp-edges;}
+  /* zoom+pan target. NO `will-change:transform`: it promotes this to its own layer,
+     which the browser rasterises once and then stretches -> blurry dot labels. */
+  .mapzoom{position:relative;transform-origin:0 0;}
+  .mapoverlay{position:absolute;inset:0;}
+  .mapzoom-ctrl{position:absolute;right:8px;bottom:8px;z-index:6;display:flex;flex-direction:column;gap:6px;}
+  .mapzoom-ctrl button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line2);
+      background:rgba(15,23,19,.88);color:var(--ink);font-size:20px;font-weight:800;line-height:1;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .mapzoom-ctrl button:active{background:var(--brand);color:#04120a;}
+  /* --dotscale = 1/zoom (set in mApply) so dots keep the SAME on-screen size at any
+     zoom: zooming spreads them apart instead of blowing them up. */
+  .wp-dot{position:absolute;transform:translate(-50%,-50%) scale(var(--dotscale,1));
+          width:15px;height:15px;border-radius:50%;
+          background:var(--brand);border:2px solid #06210f;box-shadow:0 0 0 2px rgba(34,197,94,.4);cursor:pointer;z-index:2;}
+  .wp-dot .wp-name{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);white-space:nowrap;
+          font-size:10px;font-weight:800;color:var(--ink);background:rgba(10,20,15,.85);padding:1px 5px;border-radius:6px;pointer-events:none;}
+  .robot-dot{position:absolute;transform:translate(-50%,-50%) scale(var(--dotscale,1));
+          width:16px;height:16px;border-radius:50%;
+          background:#ff5252;border:2px solid #fff;box-shadow:0 0 10px 2px rgba(255,82,82,.75);z-index:3;pointer-events:none;}
+  .maphint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+           color:var(--muted);font-size:13px;text-align:center;padding:20px;}
+  .camwrap{position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
+           background:#0a100c;border:1.5px solid var(--line2);display:flex;align-items:center;justify-content:center;}
+  .camwrap img{width:100%;height:100%;object-fit:cover;display:none;}
+  .camwrap .camoff{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);
+                   font-size:14px;font-weight:600;text-align:center;padding:20px;}
+  .camwrap .camoff svg{width:40px;height:40px;stroke:#3f5147;}
+  .camwrap .rec-dot{position:absolute;top:12px;left:12px;display:none;align-items:center;gap:7px;font-size:12px;
+                    font-weight:800;color:#fff;background:rgba(0,0,0,.45);padding:5px 10px;border-radius:20px;}
+  .camwrap .rec-dot i{width:9px;height:9px;border-radius:50%;background:#ff5252;animation:blink 1.4s infinite;}
+  .camwrap.live img{display:block;} .camwrap.live .camoff{display:none;} .camwrap.live .rec-dot{display:flex;}
+
+  .status{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);
+          color:var(--ink);font-size:14.5px;font-weight:600;text-align:center;line-height:1.35;
+          background:rgba(18,28,22,.92);border:1px solid rgba(74,222,128,.4);border-radius:16px;
+          padding:12px 18px;box-shadow:0 12px 30px -12px rgba(0,0,0,.8);
+          -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:toast .2s ease;}
+  .status:empty{display:none;}
+  @keyframes toast{from{opacity:0;transform:translate(-50%,10px);}to{opacity:1;transform:translate(-50%,0);}}
+
+  /* Scan-me QR, bottom-right */
+  .qrdock{position:fixed;z-index:60;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));}
+  .qrcard{background:var(--card);border:1px solid var(--line2);border-radius:18px;padding:12px 12px 11px;
+          box-shadow:var(--shadow);text-align:center;width:164px;position:relative;}
+  .qrcard img{width:138px;height:138px;border-radius:11px;display:block;background:#eafff1;}
+  .qrcard .qrlab{font-size:12px;font-weight:800;color:var(--ink);margin-top:9px;letter-spacing:-.01em;}
+  .qrcard .qrurl{font-size:11px;font-weight:600;color:var(--brand2);word-break:break-all;margin-top:2px;line-height:1.3;}
+  .qrcard .qrmin{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line2);
+          background:#0f1713;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;
+          display:flex;align-items:center;justify-content:center;}
+  .qrfab{display:none;width:58px;height:58px;border-radius:18px;border:1px solid var(--line2);cursor:pointer;
+         background:var(--card);box-shadow:var(--shadow);align-items:center;justify-content:center;}
+  .qrfab svg{width:30px;height:30px;stroke:var(--brand2);}
+  .qrdock.min .qrcard{display:none;} .qrdock.min .qrfab{display:flex;}
+
+  /* Always-there emergency STOP, bottom-left */
+  .estop{position:fixed;z-index:70;left:16px;bottom:calc(16px + env(safe-area-inset-bottom));
+         width:66px;height:66px;border-radius:20px;border:none;cursor:pointer;color:#fff;
+         font-size:14px;font-weight:800;letter-spacing:.04em;
+         background:linear-gradient(135deg,#f87171,#dc2626);
+         box-shadow:0 14px 30px -10px rgba(220,38,38,.75),0 0 0 1px rgba(248,113,113,.45);
+         display:flex;align-items:center;justify-content:center;}
+  .estop:active{transform:scale(.93);filter:brightness(.96);}
+
+  /* "Talk to me" chat transcript + quick-suggestion chips */
+  .chat{display:flex;flex-direction:column;gap:8px;max-height:40vh;overflow-y:auto;
+        margin-bottom:16px;padding:2px;}
+  .chat:empty{display:none;}
+  .bubble{max-width:82%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.35;
+          word-wrap:break-word;}
+  .bubble.you{align-self:flex-end;background:var(--brand);color:#04120a;font-weight:600;
+              border-bottom-right-radius:5px;}
+  .bubble.bot{align-self:flex-start;background:#0f1713;color:var(--ink);border:1px solid var(--line2);
+              border-bottom-left-radius:5px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .chip{background:#0f1713;border:1px solid var(--line2);color:var(--ink);border-radius:999px;
+        padding:8px 13px;font-size:13px;font-weight:600;cursor:pointer;}
+  .chip:active{transform:scale(.96);filter:brightness(1.1);}
+  /* Saved-tour chips. Tap loads the stops; the little x deletes. */
+  .tour-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .tour-chips:empty::after{content:"No saved tours yet — pick stops and tap Save as…";
+        color:var(--brand2);font-size:12px;opacity:.7;}
+  .tchip{display:inline-flex;align-items:center;gap:8px;background:#12251a;border:1px solid #2f7a55;
+         color:#63d69a;border-radius:999px;padding:7px 6px 7px 13px;font-size:13px;font-weight:700;
+         cursor:pointer;}
+  .tchip:active{transform:scale(.96);}
+  .tchip .del{width:20px;height:20px;border-radius:50%;border:none;background:#0c1a12;color:#63d69a;
+        font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .tchip .del:hover{background:#2a1113;color:#ff6b7a;}
+
+  /* Instructions: "?" button top-left of the header, unfolds a card below it */
+  /* THE ROBOT'S OWN DIALOG. Replaces the browser's grey prompt()/confirm() with one that wears the
+     app's theme (same card, green, type) so a question never looks like it came from Chrome. */
+  .modal-back{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+        padding:22px;background:rgba(4,8,6,.66);backdrop-filter:blur(3px);}
+  .modal-back.show{display:flex;}
+  .modal{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:22px;
+        box-shadow:var(--shadow);padding:22px;transform:translateY(8px);opacity:0;transition:.16s;}
+  .modal-back.show .modal{transform:none;opacity:1;}
+  .modal .m-msg{color:var(--ink);font-size:16.5px;font-weight:600;line-height:1.4;white-space:pre-line;}
+  .modal input[type=text]{margin-top:16px;}
+  .modal .m-row{display:flex;gap:10px;margin-top:20px;}
+  .modal .m-row button{flex:1;border:none;border-radius:14px;font-size:15.5px;font-weight:700;cursor:pointer;
+        padding:14px 0;font-family:inherit;transition:.12s;}
+  .modal .m-cancel{background:#0f1713;border:1.5px solid var(--line2)!important;color:var(--muted);}
+  .modal .m-cancel:active{background:#0c110d;}
+  .modal .m-ok{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(34,197,94,.28);}
+  .modal .m-ok:active{transform:translateY(1px);}
+  .helpbtn{width:40px;height:40px;border-radius:50%;flex-shrink:0;cursor:pointer;
+           background:#0f1713;border:1.5px solid var(--line2);color:var(--brand2);
+           font-size:19px;font-weight:800;line-height:1;
+           display:flex;align-items:center;justify-content:center;}
+  .helpbtn:active{filter:brightness(1.3);transform:scale(.94);}
+  /* The speaker switch. It is RED when the robot is muted, and loudly so: a silenced robot looks
+     exactly like a working one -- it still fills the chat, with the same pauses for lines nobody
+     hears. The switch is the only honest place to see it, so it must not be subtle. */
+  .spkbtn{width:40px;height:40px;border-radius:50%;flex-shrink:0;cursor:pointer;
+          background:#0f1713;border:1.5px solid var(--line2);color:var(--brand2);
+          font-size:17px;line-height:1;
+          display:flex;align-items:center;justify-content:center;}
+  .spkbtn:active{filter:brightness(1.3);transform:scale(.94);}
+  .spkbtn.muted{background:#2a1113;border-color:#7f1d2a;color:#ff6b7a;}
+  /* The volume popover. Tap the speaker button and a slider drops down -- so the robot can be quiet
+     but audible next to colleagues, not just on/off. */
+  .spkwrap{position:relative;}
+  .spkpop{position:absolute; top:48px; left:0; z-index:40; display:none;
+          background:var(--card); border:1px solid var(--line2); border-radius:14px;
+          padding:12px 14px; box-shadow:var(--shadow); width:190px;}
+  .spkpop.open{display:block;}
+  .spkpop label{font-size:11px; color:var(--brand2); font-weight:700; letter-spacing:.04em;
+                text-transform:uppercase; display:flex; justify-content:space-between;}
+  .spkpop input[type=range]{width:100%; margin:9px 0 4px; accent-color:var(--brand2);}
+  .spkpop .mutebtn{width:100%; margin-top:6px; padding:6px; border-radius:8px; cursor:pointer;
+                   background:#0f1713; border:1px solid var(--line2); color:var(--brand2);
+                   font-size:12px; font-weight:700;}
+  .spkpop .explrow{display:flex; align-items:center; justify-content:space-between; gap:8px;
+                   margin-top:11px; padding-top:10px; border-top:1px solid var(--line);
+                   font-size:12px; color:var(--fg);}
+  .explbtn{padding:4px 12px; border-radius:999px; cursor:pointer; font-size:11px; font-weight:800;
+           border:1px solid var(--line2);}
+  .explbtn.on{background:#12251a; border-color:#2f7a55; color:#63d69a;}
+  .explbtn.off{background:#1a1a1e; border-color:#444; color:#aaa;}
+  .cdBtn{padding:8px 14px; border-radius:999px; cursor:pointer; font-size:13px; font-weight:700;
+         background:#1a1a1e; border:1px solid var(--line2); color:#aaa;}
+  .cdBtn.on{background:#12251a; border-color:#2f7a55; color:#63d69a;}
+  .helpcard{background:var(--card);border:1px solid var(--line);border-radius:20px;
+            padding:18px 20px;box-shadow:var(--shadow);margin:-8px 0 20px;}
+  .helpcard.hidden{display:none;}
+  .helpcard h4{font-size:15px;font-weight:800;margin-bottom:4px;}
+  .helpcard h4:not(:first-child){margin-top:14px;}
+  .helpcard ol,.helpcard ul{margin:0 0 0 18px;}
+  .helpcard li{font-size:13.5px;color:var(--muted);line-height:1.5;margin-top:5px;}
+  .helpcard li b{color:var(--ink);font-weight:700;}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="head">
+      <button class="helpbtn" onclick="toggleHelp()" aria-label="Instructions">?</button>
+      <div class="spkwrap">
+        <button class="spkbtn" id="spk" onclick="toggleSpkPop()" aria-label="Speaker volume"
+                title="Speaker volume">&#128266;</button>
+        <div class="spkpop" id="spkpop">
+          <label>Volume <span id="volnum">100%</span></label>
+          <input type="range" id="volrange" min="0" max="100" step="5" value="100"
+                 oninput="onVol(this.value)">
+          <button class="mutebtn" onclick="muteQuick()">Mute</button>
+          <div class="explrow">
+            <span>Explain each place</span>
+            <button class="explbtn on" id="explbtn" onclick="toggleExpl()">On</button>
+          </div>
+        </div>
+      </div>
+      <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="12" rx="3.5"/><path d="M12 7V4"/><circle cx="12" cy="3" r="1"/><circle class="eye" cx="9" cy="13" r="1.3" stroke="none"/><circle class="eye" cx="15" cy="13" r="1.3" stroke="none"/></svg></div>
+      <div class="who"><div class="name">Wall-E</div><div class="role">Floor 4 Guide</div></div>
+      <div class="online"><span class="dot"></span> Online</div>
+    </div>
+
+    <div class="helpcard hidden" id="helpCard">
+      <h4>1 · Wi-Fi (do this first)</h4>
+      <ul>
+        <li>The <b>robot must be connected to Wi-Fi</b>.</li>
+        <li>Your <b>phone and the robot must be on the same Wi-Fi network</b> — otherwise this page will not work.</li>
+        <li>Recommended network: <b>DirectSupplyGuest</b> (connect both the robot and your phone to it).</li>
+      </ul>
+      <h4>2 · Start the robot (on the robot's screen - On the desktop in files)</h4>
+      <p class="hint" style="margin:2px 0 6px;">Plug a <b>mouse</b> into the robot for these steps — you need to right-click.</p>
+      <ol>
+        <li>Right-click <b>Navigation</b> — and select run as Program. Wait about a minute.</li>
+        <li>Right-click <b>Robot Web QR</b> and select run as Program. Scan it with your phone to open this page.</li>
+      </ol>
+      <h4>3 · Tell the robot where it is</h4>
+      <ol>
+        <li>Go to <b>Map</b> and press <b>I'm here</b>.</li>
+        <li>Tap where the robot <b>is</b>, then tap the way it is <b>facing</b>. Done — no RViz.</li>
+      </ol>
+      <h4>4 · Use it</h4>
+      <ul>
+        <li><b>Take me somewhere</b> — tap a place; the robot leads you and tells you about it.</li>
+        <li><b>Talk to me</b> — tap the mic and speak in English, or type. Ask questions
+            ("what is the glass room?"), ask to be taken somewhere, or say "show me around" for a tour.</li>
+        <li><b>Tour</b> — tick the stops in the order you want, then Start tour.</li>
+        <li><b>🔊 Speaker</b> (top-left) — tap to silence the robot, tap again to give it its voice
+            back. It keeps saying everything either way; muted, you read it here instead. The button
+            turns <b>red</b> while it is muted, because a silent robot looks exactly like a working
+            one.</li>
+        <li><b>Map</b> — Go / Add a point / Remove / I'm here. Pinch or use + − to zoom.</li>
+        <li><b>Drive me</b> — steer it by hand. <b>Camera</b> — see its view.</li>
+      </ul>
+      <h4>5 · Faces — the robot greets people by name</h4>
+      <ul>
+        <li><b>Add me</b> — teach it your face. Type your name, press <b>Start</b>, and it shows what
+            it sees and <b>talks you through it</b> — turn your head as it asks (left, right) so it
+            knows you from any angle. Next time it says hello by name. You can also <b>upload
+            photos</b> instead of scanning.</li>
+        <li><b>Say hello to people I know</b> — the switch that turns greetings on or off. It is
+            remembered through reboots.</li>
+        <li><b>It only says hello.</b> The robot's own microphone is far-field and sits next to its
+            speaker, which never became reliable — so to ask it anything, use <b>Talk to me</b>
+            here, where your phone's mic does the listening. The greetings say so out loud.</li>
+        <li><b>Greet the same person again after</b> — <b>30 sec / 1 min / 5 min / 10 min</b>: how long
+            before it re-greets someone. Use <b>30 sec</b> for a demo, <b>5 min</b> for every day.</li>
+        <li><b>Remove someone</b> — tap their name in the list and confirm.</li>
+        <li><b>Privacy</b> — it stores a <b>fingerprint</b> (a set of numbers), <b>never a photo</b>, and
+            adding yourself is voluntary.</li>
+      </ul>
+      <h4>6 · Good to know</h4>
+      <ul>
+        <li>The red <b>STOP</b> button (bottom-left) stops the robot at any time — anyone can press it.</li>
+        <li>Only <b>one phone</b> controls the robot at a time; the others can watch.</li>
+        <li>The robot needs a moment to think before it answers or sets off.</li>
+      </ul>
+    </div>
+
+    <div class="ctrlbar" id="ctrlBar">
+      <span id="ctrlMsg">Another phone is in control — you're view-only</span>
+      <button onclick="takeControl()">Take control</button>
+    </div>
+
+    <section id="home" class="screen active">
+      <div class="menu">
+        <button class="tile c1" onclick="show('nav')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.3-7-11a7 7 0 0 1 14 0c0 4.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span><h3>Take me somewhere</h3><p>Pick a destination and I'll lead you there.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c2" onclick="show('talk')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg></span><span><h3>Talk to me</h3><p>Say what you need and I'll take you.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c3" onclick="show('map')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg></span><span><h3>Map</h3><p>See the map — tap to go or save a point.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c3" onclick="show('drive')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M7 7l-4 5 4 5M17 7l4 5-4 5"/></svg></span><span><h3>Drive me</h3><p>Steer me with on-screen controls.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c4" onclick="show('msg')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"/></svg></span><span><h3>Messenger</h3><p>Send me somewhere to say a message.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c5" onclick="show('tour')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/></svg></span><span><h3>Tour</h3><p>Take a guided tour of several points.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c7" onclick="show('cam')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.2l1.2-1.8h6.2L15.3 6h1.2A2.5 2.5 0 0 1 19 8.5v8A2.5 2.5 0 0 1 16.5 19h-11A2.5 2.5 0 0 1 3 16.5z"/><circle cx="11" cy="12" r="3.2"/></svg></span><span><h3>Camera</h3><p>See my view and take a photo.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c8" onclick="show('arm')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21v-4l6-3 3-6"/><circle cx="5" cy="21" r="0.6" fill="currentColor"/><circle cx="11" cy="14" r="2"/><path d="M14 8l3.5-3.5M14 8l4.5 1M14 8l-1-4.5"/></svg></span><span><h3>Arm</h3><p>Wave, raise, or look around.</p></span><span class="chev">&rsaquo;</span></button>
+        <button class="tile c2" id="faceTile" style="display:none;" onclick="show('face')"><span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span><span><h3>Add me</h3><p>Teach the robot your face — it'll say hello.</p></span><span class="chev">&rsaquo;</span></button>
+      </div>
+    </section>
+
+    <section id="nav" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Take me somewhere</div>
+      <div class="card" style="margin-bottom:16px;">
+        <button class="addbtn" onclick="toggleAdd()">+ Add a new point</button>
+        <div class="addform hidden" id="addForm">
+          <input id="pointName" type="text" placeholder="Point name (e.g. Meeting Room)" autocomplete="off">
+          <button class="btn" onclick="addPoint()">Save the robot's current spot</button>
+          <p class="hint">Saves wherever the robot is standing now. Navigation must be running and the robot located (2D Pose Estimate set) — otherwise it can't read its position.</p>
+        </div>
+      </div>
+      <div class="card"><div class="sub-label">Saved points</div><div class="places" id="places"></div></div>
+    </section>
+
+    <section id="talk" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Talk to me</div>
+      <div class="card">
+        <div class="voice">
+          <button id="mic" class="mic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M8 21h8"/></svg></button>
+          <div class="mic-label" id="micLabel">Tap and speak</div>
+        </div>
+        <div class="or">or type it</div>
+        <div class="chat" id="chatLog"></div>
+        <div class="row">
+          <input id="talkText" type="text" placeholder="e.g. I'm hungry / take me to reception" autocomplete="off">
+          <button class="btn" onclick="sendTalk()">Send</button>
+        </div>
+        <div class="chips" id="talkChips"></div>
+      </div>
+    </section>
+
+    <section id="drive" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Drive me</div>
+      <div class="card"><div class="pad">
+        <div class="empty"></div><button data-dir="fwd">&#9650;</button><div class="empty"></div>
+        <button data-dir="left">&#9664;</button><button class="stop" data-dir="stop">STOP</button><button data-dir="right">&#9654;</button>
+        <div class="empty"></div><button data-dir="back">&#9660;</button><div class="empty"></div>
+      </div></div>
+    </section>
+
+    <section id="msg" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Messenger</div>
+      <div class="card">
+        <div class="sub-label">Where should I go?</div>
+        <select id="msgPlace"></select>
+        <div class="sub-label" style="margin-top:18px;">What should I say there?</div>
+        <textarea id="msgText" rows="3" placeholder="e.g. Your visitor has arrived at reception."></textarea>
+        <button class="btn block" onclick="sendMessenger()">Send Wall-E</button>
+      </div>
+    </section>
+
+    <section id="tour" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Tour</div>
+      <div class="card">
+        <div class="sub-label">Saved tours</div>
+        <div id="tourChips" class="tour-chips"></div>
+        <div class="sub-label" style="margin-top:12px">Pick the stops (in order)</div>
+        <div id="tourList"></div>
+        <div id="tourSummary" class="tour-summary empty"></div>
+        <div class="tour-actions">
+          <button class="btn ghost" onclick="clearTour()">Clear</button>
+          <button class="btn ghost" onclick="saveTourPrompt()">Save as…</button>
+          <button class="btn" style="flex:1" onclick="startTour()">Start tour</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="map" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Map</div>
+      <div class="card">
+        <div class="row" style="margin-bottom:14px;">
+          <button class="btn" id="modeGo" onclick="setMapMode('go')">Go</button>
+          <button class="btn" id="modeAdd" onclick="setMapMode('add')">Add</button>
+          <button class="btn" id="modeDel" onclick="setMapMode('del')">Remove</button>
+          <button class="btn" id="modeHere" onclick="setMapMode('here')">I'm here</button>
+        </div>
+        <div class="mapwrap" id="mapWrap">
+          <div class="mapzoom" id="mapZoom">
+            <img id="mapImg" alt="Map">
+            <div class="mapoverlay" id="mapOverlay"></div>
+          </div>
+          <div class="maphint" id="mapHint">Loading map…</div>
+          <div class="mapzoom-ctrl">
+            <button type="button" onclick="mapZoomBtn(1)" aria-label="Zoom in">+</button>
+            <button type="button" onclick="mapZoomBtn(-1)" aria-label="Zoom out">−</button>
+            <button type="button" onclick="mapZoomReset()" aria-label="Reset zoom">⟳</button>
+          </div>
+        </div>
+        <p class="hint" id="mapNote" style="margin-top:10px;">Green = saved points, red = the robot. <b>Go</b>: tap a point or the floor to drive there. <b>Add</b>: tap the floor to save a point. <b>Remove</b>: tap a green point to delete it. <b>I'm here</b>: after launching, tap where the robot is, then tap the way it's facing — sets its position (no RViz needed). (Robot dot + driving need Navigation running.)</p>
+      </div>
+    </section>
+
+    <section id="cam" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Camera</div>
+      <div class="card">
+        <div class="camwrap" id="camWrap">
+          <span class="rec-dot"><i></i> LIVE</span>
+          <img id="camView" alt="Live camera">
+          <div class="camoff" id="camOff">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.2l1.2-1.8h6.2L15.3 6h1.2A2.5 2.5 0 0 1 19 8.5v8A2.5 2.5 0 0 1 16.5 19h-11A2.5 2.5 0 0 1 3 16.5z"/><circle cx="11" cy="12" r="3.2"/></svg>
+            <span>Live view shows here on the robot</span>
+          </div>
+        </div>
+        <button class="btn block" onclick="takePhoto()">Take photo</button>
+      </div>
+    </section>
+
+    <section id="face" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Add me</div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="sub-label">Stand in front of the robot</div>
+        <img id="faceMirror" alt="What the robot sees"
+             style="width:100%;border-radius:16px;background:#0f1713;display:none;margin-bottom:14px;">
+        <input id="faceName" type="text" placeholder="Your name (e.g. Jonny)" autocomplete="off">
+        <button class="btn block" style="margin-top:14px;" id="faceGo" onclick="faceEnroll()">Start</button>
+        <p class="hint" style="margin-top:10px;">Type your name, then press <b>Start</b>. The robot will
+          show what it sees and talk you through it — <b>turn your head</b> as it asks (left, right) so
+          it knows you from any angle. It stores a <b>fingerprint</b>, never your photo.</p>
+
+        <div style="display:flex;align-items:center;gap:10px;margin:18px 0 14px;">
+          <div style="flex:1;height:1px;background:var(--line2);"></div>
+          <div class="hint" style="margin:0;">or upload photos</div>
+          <div style="flex:1;height:1px;background:var(--line2);"></div>
+        </div>
+        <input type="file" id="facePics" accept="image/*" multiple style="display:none;" onchange="facePicked()">
+        <button class="btn block" style="background:#0f1713;border:1.5px solid var(--line2);color:var(--ink);box-shadow:none;"
+                id="facePicsBtn" onclick="document.getElementById('facePics').click()">Choose photos…</button>
+        <p class="hint" style="margin-top:10px;">Use 3–6 clear photos of one face, from slightly
+          different angles. They are measured and <b>thrown away</b> — they never reach the disk.
+          Scanning above works a little better, because it uses the same lens that has to
+          recognise you.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="flex:1;">
+            <div style="font-size:15.5px;font-weight:700;">Say hello to people I know</div>
+            <div class="hint" style="margin-top:3px;">Greets each person once every few minutes.</div>
+          </div>
+          <button class="explbtn" id="greetSw" onclick="toggleGreet()">OFF</button>
+        </div>
+        <div style="border-top:1px solid var(--line2);margin-top:14px;padding-top:14px;">
+          <div class="sub-label" style="margin-bottom:8px;">Greet the same person again after</div>
+          <div id="cooldownBtns" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="cdBtn" data-secs="30"  onclick="setCooldown(30)">30 sec</button>
+            <button class="cdBtn" data-secs="60"  onclick="setCooldown(60)">1 min</button>
+            <button class="cdBtn" data-secs="300" onclick="setCooldown(300)">5 min</button>
+            <button class="cdBtn" data-secs="600" onclick="setCooldown(600)">10 min</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sub-label">The robot knows</div>
+        <div class="places" id="faceList"></div>
+      </div>
+    </section>
+
+    <section id="arm" class="screen">
+      <button class="back" onclick="show('home')">&lsaquo; Back</button>
+      <div class="sec-title">Arm</div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="sub-label">Quick poses</div>
+        <div class="places">
+          <button class="place" onclick="armPose('wave')">Wave</button>
+          <button class="place" onclick="armPose('bigwave')">Big wave</button>
+          <button class="place" onclick="armPose('raise')">Raise</button>
+          <button class="place" onclick="armPose('look')">Look around</button>
+          <button class="place" onclick="armPose('nod')">Yes</button>
+          <button class="place" onclick="armPose('shake')">No</button>
+          <button class="place" onclick="armPose('dance')">Dance</button>
+          <button class="place" onclick="armPose('twirl')">Twirl</button>
+          <button class="place" onclick="armPose('mouth')">Talk mouth</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sub-label">Free move — joint by joint</div>
+        <button class="btn block" style="margin:0 0 14px;" onclick="armCenter()">↺ Reset arm to start</button>
+        <div id="joints"></div>
+        <p class="hint" style="margin-top:6px;">Tap <b>↺ Reset arm to start</b> first so the arm matches the sliders. Move slowly, keep the arm clear of obstacles. No object lifting (Phase 2).</p>
+      </div>
+    </section>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <button class="estop" onclick="stopAll()" aria-label="Stop the robot">STOP</button>
+
+  <!-- The robot's own themed dialog (replaces browser prompt/confirm). See uiPrompt/uiConfirm. -->
+  <div class="modal-back" id="uiModalBack">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="m-msg" id="uiModalMsg"></div>
+      <input type="text" id="uiModalInput" autocomplete="off" style="display:none;">
+      <div class="m-row">
+        <button class="m-cancel" id="uiModalCancel">Cancel</button>
+        <button class="m-ok" id="uiModalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="qrdock min" id="qrdock">
+    <button class="qrfab" onclick="qrToggle()" aria-label="Show QR code">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v.01M14 21h.01M21 21v.01M21 17v.01M17 21v.01"/></svg>
+    </button>
+    <div class="qrcard">
+      <button class="qrmin" onclick="qrToggle()" aria-label="Hide">&times;</button>
+      <img id="qrImg" alt="QR code">
+      <div class="qrlab" id="qrLab">Scan to open</div>
+      <div class="qrurl" id="qrUrl"></div>
+    </div>
+  </div>
+
+<script>
+  const DEMO = location.protocol === 'file:';   // opened by double-click = design preview
+
+  // THE ROBOT'S OWN DIALOGS. Drop-in async replacements for the browser's prompt()/confirm(), so a
+  // question wears the app's theme instead of Chrome's grey box. Callers `await` them.
+  //   await uiConfirm('Remove X?')            -> true / false
+  //   await uiPrompt('Name this point:', def) -> the string, or null if cancelled
+  // One modal, reused. Enter = OK, Escape / backdrop / Cancel = cancel.
+  let _uiModalResolve = null;
+  function _uiModalClose(value){
+    const back=document.getElementById('uiModalBack');
+    back.classList.remove('show');
+    const r=_uiModalResolve; _uiModalResolve=null;
+    if(r) r(value);
+  }
+  function _uiModalOpen({message, withInput, def, okLabel}){
+    return new Promise(resolve=>{
+      _uiModalResolve=resolve;
+      document.getElementById('uiModalMsg').textContent=message||'';
+      const inp=document.getElementById('uiModalInput');
+      inp.style.display = withInput ? 'block' : 'none';
+      inp.value = withInput ? (def||'') : '';
+      document.getElementById('uiModalOk').textContent = okLabel||'OK';
+      document.getElementById('uiModalBack').classList.add('show');
+      if(withInput){ setTimeout(()=>{ inp.focus(); inp.select(); }, 30); }
+    });
+  }
+  function uiConfirm(message, okLabel){
+    return _uiModalOpen({message, withInput:false, okLabel:okLabel||'OK'})
+      .then(v => v!==null);                       // OK -> true, cancel -> false
+  }
+  function uiPrompt(message, def, okLabel){
+    return _uiModalOpen({message, withInput:true, def, okLabel:okLabel||'OK'});
+  }
+  (function _wireModal(){
+    const back=document.getElementById('uiModalBack');
+    const inp=document.getElementById('uiModalInput');
+    document.getElementById('uiModalOk').onclick=()=>{
+      const withInput = inp.style.display!=='none';
+      _uiModalClose(withInput ? inp.value : true);   // confirm resolves non-null on OK
+    };
+    document.getElementById('uiModalCancel').onclick=()=>_uiModalClose(null);
+    back.addEventListener('click', e=>{ if(e.target===back) _uiModalClose(null); });  // tap outside = cancel
+    inp.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){ e.preventDefault(); document.getElementById('uiModalOk').click(); }
+    });
+    document.addEventListener('keydown', e=>{
+      if(e.key==='Escape' && back.classList.contains('show')) _uiModalClose(null);
+    });
+  })();
+  // Per-phone id for the single-controller lock (persists across reloads).
+  let CID = localStorage.getItem('walle_cid');
+  if(!CID){ CID = 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+            try{ localStorage.setItem('walle_cid', CID); }catch(e){} }
+  let statusTimer;
+  function status(t){const el=document.getElementById('status'); el.textContent=t||'';
+    clearTimeout(statusTimer); if(t) statusTimer=setTimeout(()=>{el.textContent='';},4200);}
+  function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active'); status(''); camStream(id==='cam'); mapActive(id==='map'); talkActive(id==='talk'); faceActive(id==='face');}
+
+  let PLACES = DEMO ? (JSON.parse(localStorage.getItem('walle_places')||'null')
+                       || ["reception","kitchen","meeting","desks","exit"]) : [];
+  const saveDemo = ()=>localStorage.setItem('walle_places', JSON.stringify(PLACES));
+
+  async function api(path, body){
+    body = Object.assign({cid:CID}, body||{});     // every command carries our pilot id
+    if(DEMO){
+      if(path==='/api/add_point' && body.name){ if(!PLACES.includes(body.name)) PLACES.push(body.name); saveDemo(); }
+      if(path==='/api/remove_point'){ PLACES=PLACES.filter(p=>p!==body.name); saveDemo(); }
+      return {ok:true, message:'(preview) '+(body.name||body.text||body.phrase||body.pose||'done')};
+    }
+    try{const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const j=await r.json();
+      if(j && j.locked) showLockBar();             // we're view-only; another phone has control
+      return j;
+    }catch(e){status("Can't reach Wall-E — check you're on the office Wi-Fi"); return {};}
+  }
+  async function loadPlaces(){
+    if(!DEMO){ try{const r=await fetch('/api/places'); PLACES=(await r.json()).places||[];}catch(e){PLACES=[];} }
+    renderNav(); renderMsg(); renderTour(); loadSavedTours();
+  }
+
+  function renderNav(){
+    const box=document.getElementById('places'); box.innerHTML='';
+    if(!PLACES.length){box.innerHTML='<div class="mic-label">No points saved yet.</div>'; return;}
+    PLACES.forEach(n=>{
+      const b=document.createElement('div'); b.className='place'; b.dataset.name=n;
+      if(n===goingTo) b.classList.add('going');
+      b.onclick=async()=>{
+        status('Taking you to '+n+'…');
+        const r=await api('/api/go',{name:n});
+        status(r.message||'');
+        if(r && r.ok!==false) setGoing(n);      // only light up if the robot accepted
+      };
+      const l=document.createElement('span'); l.textContent=n; b.appendChild(l);
+      const t=document.createElement('span'); t.className='go-tag'; t.textContent='Going…'; b.appendChild(t);
+      const d=document.createElement('button'); d.className='del'; d.textContent='×';
+      d.onclick=(e)=>{e.stopPropagation(); removePoint(n);}; b.appendChild(d);
+      box.appendChild(b);
+    });
+  }
+  let goingTo=null, goSeenBusy=false;
+  function setGoing(n){
+    goingTo=n; goSeenBusy=false;
+    document.querySelectorAll('#places .place').forEach(el=>{
+      el.classList.toggle('going', el.dataset.name===goingTo);
+    });
+  }
+  function toggleAdd(){document.getElementById('addForm').classList.toggle('hidden');}
+  async function addPoint(){
+    const el=document.getElementById('pointName'); const name=el.value.trim();
+    if(!name){status('Type a name first'); return;}
+    if(!DEMO){                                           // don't save a garbage spot if we're lost
+      try{ const st=await (await fetch('/api/status')).json();
+        if(!st.localized){ status("I don't know where I am yet — start Navigation and set my position (2D Pose Estimate) first."); return; }
+      }catch(e){}
+    }
+    const k=await askKnowledge(name);                    // ASK FIRST
+    if(k===null){status('Cancelled — point not added'); return;}   // cancel -> add NOTHING
+    status('Saving the robot\'s current spot…');
+    const r=await api('/api/add_point',{name}); status(r.message||'');
+    if(r && r.ok!==false) await saveKnowledge(name,k);   // point saved -> store what's there
+    el.value=''; document.getElementById('addForm').classList.add('hidden'); loadPlaces();
+  }
+  // BEFORE saving a point, ask WHAT is there (Claude pre-fills; you confirm/edit).
+  // Returns {what,aka,category} to store, or null if you CANCEL (then nothing is added).
+  async function askKnowledge(name){
+    status('Asking what "'+name+'" is…');
+    const s=await api('/api/suggest_knowledge',{name})||{};
+    let what=await uiPrompt('What is "'+name+'"? The robot will say this when it arrives.\n(Cancel to NOT add the point)', s.what||'', 'Save');
+    while(what!==null && !what.trim()){                  // OK but empty -> keep asking, don't save
+      what=await uiPrompt('A description is required — what is "'+name+'"?\n(Cancel to NOT add the point)', s.what||'', 'Save');
+    }
+    if(what===null) return null;                         // CANCEL -> abort the whole add
+    const akaDefault=(s.aka&&s.aka.length)? s.aka.join(', ') : '';
+    const aka=(await uiPrompt('Other names people might call it? (comma-separated, optional)', akaDefault))||'';
+    const akaList=aka.split(',').map(x=>x.trim()).filter(Boolean);
+    return {what:what.trim(), aka:akaList, category:s.category||'landmark'};
+  }
+  // Store the description in the knowledge base (only if there's anything to store).
+  async function saveKnowledge(name,k){
+    if(!k || (!k.what && !k.aka.length)) return;         // OK'd but left empty -> plain point
+    const r=await api('/api/save_knowledge',{name, what:k.what, aka:k.aka, category:k.category});
+    status(r.message||'');
+  }
+  async function removePoint(name){
+    if(!await uiConfirm('Remove "'+name+'"?', 'Remove')) return;
+    const r=await api('/api/remove_point',{name}); status(r.message||''); loadPlaces();
+  }
+
+
+  function renderMsg(){
+    const sel=document.getElementById('msgPlace'); sel.innerHTML='';
+    PLACES.forEach(n=>{const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o);});
+  }
+  async function sendMessenger(){
+    const name=document.getElementById('msgPlace').value;
+    const text=document.getElementById('msgText').value.trim();
+    if(!name){status('No points saved yet'); return;}
+    if(!text){status('Type the message first'); return;}
+    status('Sending Wall-E to '+name+'…'); const r=await api('/api/messenger',{name,phrase:text}); status(r.message||'');
+  }
+
+  let tourOrder=[];
+  function renderTour(){
+    const box=document.getElementById('tourList'); box.innerHTML=''; tourOrder=[];
+    if(!PLACES.length){box.innerHTML='<div class="mic-label">No points saved yet.</div>'; return;}
+    PLACES.forEach(n=>{
+      const l=document.createElement('label'); l.className='check';
+      const c=document.createElement('input'); c.type='checkbox'; c.value=n;
+      const s=document.createElement('span'); s.textContent=n;
+      const b=document.createElement('span'); b.className='ord';
+      c.onchange=()=>{
+        if(c.checked) tourOrder.push(n); else tourOrder=tourOrder.filter(x=>x!==n);
+        l.classList.toggle('on',c.checked);
+        updateTourBadges();
+      };
+      l.appendChild(c); l.appendChild(s); l.appendChild(b); box.appendChild(l);
+    });
+    updateTourBadges();
+  }
+  function updateTourBadges(){
+    document.querySelectorAll('#tourList .check').forEach(l=>{
+      const n=l.querySelector('input').value, b=l.querySelector('.ord');
+      const i=tourOrder.indexOf(n);
+      b.textContent=i>=0?(i+1):'';
+    });
+    const sum=document.getElementById('tourSummary');
+    if(!tourOrder.length){
+      sum.className='tour-summary empty';
+      sum.textContent='Tap the stops in the order you want to visit them.';
+    }else{
+      sum.className='tour-summary';
+      const s=tourOrder.length===1?'stop':'stops';
+      sum.textContent=`Tour: ${tourOrder.join('  →  ')}   (${tourOrder.length} ${s})`;
+    }
+  }
+  function clearTour(){
+    tourOrder=[];
+    document.querySelectorAll('#tourList .check').forEach(l=>{
+      l.querySelector('input').checked=false; l.classList.remove('on');
+    });
+    updateTourBadges();
+  }
+  async function startTour(){
+    const names=[...tourOrder];
+    if(!names.length){status('Pick at least one stop'); return;}
+    status('Starting the tour…'); const r=await api('/api/tour',{names}); status(r.message||'');
+  }
+
+  // ---- Saved tours -------------------------------------------------------------------------
+  // A saved tour is an ordered list of stop names. Tapping a chip LOADS it (ticks those stops, in
+  // order) and leaves it for the human to press Start -- never auto-drives, so you can eyeball the
+  // route before the robot moves in front of anyone. The x deletes.
+  let SAVED_TOURS={};
+  async function loadSavedTours(){
+    try{ SAVED_TOURS=(await (await fetch('/api/tours')).json()).tours||{}; }catch(e){ SAVED_TOURS={}; }
+    renderTourChips();
+  }
+  function renderTourChips(){
+    const box=document.getElementById('tourChips'); if(!box) return;
+    box.innerHTML='';
+    Object.keys(SAVED_TOURS).forEach(name=>{
+      const chip=document.createElement('span'); chip.className='tchip';
+      const lab=document.createElement('span'); lab.textContent=name;
+      lab.onclick=()=>applyTour(name);
+      const ed=document.createElement('button'); ed.className='del'; ed.textContent='✎';
+      ed.title='Rename this tour';
+      ed.onclick=(e)=>{e.stopPropagation(); renameTour(name);};
+      const x=document.createElement('button'); x.className='del'; x.textContent='×';
+      x.title='Delete this tour';
+      x.onclick=(e)=>{e.stopPropagation(); deleteTour(name);};
+      chip.appendChild(lab); chip.appendChild(ed); chip.appendChild(x); box.appendChild(chip);
+    });
+  }
+  function applyTour(name){
+    const stops=SAVED_TOURS[name]||[];
+    clearTour();                                         // start from a clean slate...
+    stops.forEach(n=>{                                   // ...then tick each stop, in order
+      const l=[...document.querySelectorAll('#tourList .check')]
+              .find(l=>l.querySelector('input').value===n);
+      if(l){ const c=l.querySelector('input'); c.checked=true; c.onchange(); }
+    });
+    const missing=stops.filter(n=>!PLACES.includes(n));
+    status(missing.length ? `Loaded '${name}' — ${missing.join(', ')} no longer on the map`
+                          : `Loaded '${name}'. Press Start when ready.`);
+  }
+  async function saveTourPrompt(){
+    if(!tourOrder.length){status('Pick the stops first, then save.'); return;}
+    const name=((await uiPrompt('Name this tour:',''))||'').trim();
+    if(!name) return;
+    const r=await api('/api/tours/save',{name, names:[...tourOrder]});
+    status(r.message||'');
+    if(r.tours){ SAVED_TOURS=r.tours; renderTourChips(); }
+  }
+  async function deleteTour(name){
+    if(!await uiConfirm(`Delete the tour '${name}'?`, 'Delete')) return;
+    const r=await api('/api/tours/delete',{name});
+    status(r.message||'');
+    if(r.tours){ SAVED_TOURS=r.tours; renderTourChips(); }
+  }
+  async function renameTour(name){
+    const nw=((await uiPrompt('New name for this tour:',name))||'').trim();
+    if(!nw || nw===name) return;
+    const r=await api('/api/tours/rename',{old:name, new:nw});
+    status(r.message||'');
+    if(r.tours){ SAVED_TOURS=r.tours; renderTourChips(); }
+  }
+
+  let driveTimer=null;
+  function startDrive(dir){if(dir==='stop'){stopDrive();return;}
+    const send=()=>api('/api/drive',{dir}); send(); clearInterval(driveTimer); driveTimer=setInterval(send,200);}
+  function stopDrive(){clearInterval(driveTimer); driveTimer=null; api('/api/drive',{dir:'stop'});}
+  async function stopAll(){
+    stopDrive();                       // kill any teleop pinging too
+    setGoing(null);                    // drop the "Going…" highlight
+    status('Stopping Wall-E…');
+    const r=await api('/api/stop',{}); status(r.message||'Stopped.');
+  }
+  document.querySelectorAll('.pad button').forEach(b=>{const dir=b.dataset.dir;
+    b.addEventListener('pointerdown',e=>{e.preventDefault(); startDrive(dir);});
+    b.addEventListener('pointerup',stopDrive); b.addEventListener('pointerleave',stopDrive); b.addEventListener('pointercancel',stopDrive);});
+
+  async function sendTalk(){
+    const el=document.getElementById('talkText'); const text=el.value.trim();
+    if(!text){status('Say or type something first'); return;}
+    addBubble('you', text);                              // show what the visitor said
+    status('Got it: "'+text+'"'); const r=await api('/api/talk',{text}); status(r.message||''); el.value='';
+    if(DEMO) addBubble('bot', "(preview) On the robot I'd answer or take you there.");
+  }
+  document.getElementById('talkText').addEventListener('keydown',e=>{if(e.key==='Enter') sendTalk();});
+
+  // ---- "Add me": teach the robot your face, from the robot's own camera ----
+  // The mirror is a plain <img> we re-request ~3x a second. Not a stream: the forward camera is
+  // shared with the greeter, and a poll leaves it free the moment you walk away from this screen.
+  // The hint ("Come a bit closer") is drawn ON the image by the server -- one request, not two.
+  let faceTimer=null;
+  // The video only runs while a scan is happening -- NOT the whole time Add me is open. That way
+  // the greeter keeps working until you actually press Start, and gets the camera straight back after.
+  function mirrorOn(on){
+    clearInterval(faceTimer); faceTimer=null;
+    const img=document.getElementById('faceMirror');
+    if(!img) return;
+    if(on && !DEMO){
+      img.style.display='block';
+      const tick=()=>{ img.src='/api/face/preview.jpg?t='+Date.now(); };
+      tick(); faceTimer=setInterval(tick, 330);
+    } else {
+      img.style.display='none';
+      img.removeAttribute('src');
+    }
+  }
+  function faceActive(on){
+    if(on && !DEMO){ loadFaces(); }      // entering the screen: just load the people list
+    else { mirrorOn(false); }            // leaving: make sure the camera is released
+  }
+  function paintGreet(on){
+    const b=document.getElementById('greetSw'); if(!b) return;
+    b.textContent = on ? 'ON' : 'OFF';
+    b.style.background = on ? 'var(--grad)' : '#0f1713';
+    b.style.color = on ? '#fff' : 'var(--muted)';
+    b.style.border = on ? 'none' : '1.5px solid var(--line2)';
+  }
+  async function toggleGreet(){
+    const on = document.getElementById('greetSw').textContent !== 'ON';
+    const r = await api('/api/face/greeting', {on});
+    status(r.message||''); paintGreet(!!r.greeting);
+  }
+  function paintCooldown(secs){
+    document.querySelectorAll('#cooldownBtns .cdBtn').forEach(b=>{
+      b.classList.toggle('on', Number(b.dataset.secs)===Number(secs));
+    });
+  }
+  async function setCooldown(seconds){
+    paintCooldown(seconds);                       // instant feedback
+    const r = await api('/api/face/cooldown', {seconds});
+    if(!r.ok){ status(r.message||'Could not set that.'); loadFaces(); }
+  }
+  async function loadFaces(){
+    const box=document.getElementById('faceList'); if(!box) return;
+    try{
+      const d=await (await fetch('/api/face/list')).json();
+      paintGreet(!!d.greeting);
+      if(d.cooldown!=null) paintCooldown(d.cooldown);
+      box.innerHTML='';
+      const people = d.people || (d.names||[]).map(n=>({name:n, enrolled:0, learned:0}));
+      if(!people.length){ box.innerHTML='<div class="mic-label">Nobody yet — be the first.</div>'; return; }
+      // "Rodrigo (6+4)" -- taught 6, worked out 4 more by itself. Showing the split is the only
+      // way anyone would ever spot a profile going wrong.
+      people.forEach(p=>{
+        const b=document.createElement('button'); b.className='place';
+        b.textContent = p.name;
+        b.onclick=async()=>{
+          if(!await uiConfirm('Make the robot forget "'+p.name+'" completely?', 'Forget')) return;
+          const r=await api('/api/face/remove',{name:p.name}); status(r.message||''); loadFaces();
+        };
+        box.appendChild(b);
+      });
+    }catch(e){}
+  }
+  // Upload route. Photos are shrunk to 640 px HERE, in the browser, before they go anywhere:
+  // a phone photo is ~4 MB and six of them would be a 30 MB POST over the robot's wifi for no
+  // gain -- 640 px is what the robot's own camera gives, and the face models want no more.
+  function shrink(file, max){
+    return new Promise((resolve,reject)=>{
+      const img=new Image(), url=URL.createObjectURL(file);
+      img.onload=()=>{
+        const s=Math.min(1, max/Math.max(img.width,img.height));
+        const c=document.createElement('canvas');
+        c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg',0.88));
+      };
+      img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('bad image')); };
+      img.src=url;
+    });
+  }
+  async function facePicked(){
+    const inp=document.getElementById('facePics'), files=[...inp.files];
+    const el=document.getElementById('faceName'), name=el.value.trim();
+    if(!files.length) return;
+    if(!name){ status('Type the name first, then pick photos'); inp.value=''; return; }
+    const btn=document.getElementById('facePicsBtn');
+    btn.disabled=true; btn.textContent=`Reading ${files.length} photo(s)…`;
+    try{
+      const images=[];
+      for(const f of files){ try{ images.push(await shrink(f, 640)); }catch(e){} }
+      if(!images.length){ status('Could not read those files'); return; }
+      btn.textContent='Sending…';
+      const r=await api('/api/face/enroll_photos',{name, images});
+      status(r.message||'');
+      if(r.ok){ el.value=''; loadFaces(); }
+    } finally {
+      btn.disabled=false; btn.textContent='Choose photos…'; inp.value='';
+    }
+  }
+
+  async function faceEnroll(){
+    const el=document.getElementById('faceName'), name=el.value.trim();
+    if(!name){ status('Type your name first'); return; }
+    const btn=document.getElementById('faceGo');
+    btn.disabled=true; btn.textContent='Scanning… follow the robot';
+    mirrorOn(true);                              // video appears now, on Start
+    status('Watch the robot and turn your head as it asks');
+    try{
+      const r=await api('/api/face/enroll',{name});
+      status(r.message||'');
+      if(r.ok){ el.value=''; loadFaces(); }
+    } finally {
+      mirrorOn(false);                           // hide the video again when done
+      btn.disabled=false; btn.textContent='Start';
+    }
+  }
+
+  // ---- Talk chat transcript + suggestion chips ----
+  function addBubble(who, text){
+    const box=document.getElementById('chatLog'); if(!box || !text) return;
+    const b=document.createElement('div'); b.className='bubble '+(who==='you'?'you':'bot');
+    b.textContent=text; box.appendChild(b); box.scrollTop=box.scrollHeight;
+  }
+  const TALK_CHIPS=["Give me a tour","Take me to the kitchen","Where can I get coffee?","What is the glass room?"];
+  function renderChips(){
+    const box=document.getElementById('talkChips'); if(!box) return; box.innerHTML='';
+    TALK_CHIPS.forEach(t=>{ const b=document.createElement('button'); b.className='chip'; b.textContent=t;
+      b.onclick=()=>{ document.getElementById('talkText').value=t; sendTalk(); }; box.appendChild(b); });
+  }
+  // The robot speaks its answers/narration as "[robot] ..." lines; we poll them and
+  // append each as a bot bubble. lastSay tracks what we've already shown.
+  // TWO GUARDS, and the robot said each line exactly once -- the chat showed some of them twenty
+  // times. setInterval fires every 1200 ms whether or not the last poll came back, and while the
+  // robot is driving the Jetson is busy enough that a poll takes LONGER than that. So a second
+  // request went out carrying the same `since` as the first (lastSay is only updated at the end),
+  // both answered with the same lines, and both painted them. Under load, several stacked up.
+  //   sayBusy   never have two polls in flight
+  //   e.id      and even if we somehow do, only ever append a line we have not appended
+  // The second one is what makes this correct rather than merely unlikely.
+  let sayTimer=null, lastSay=0, sayBusy=false;
+  async function pollSay(){
+    if(DEMO || sayBusy) return;
+    sayBusy=true;
+    try{ const d=await (await fetch('/api/say_log?since='+lastSay)).json();
+      for(const e of (d.lines||[])){
+        if(e.id>lastSay){ addBubble('bot', e.text); lastSay=e.id; }
+      }
+      if(d.seq!=null && d.seq>lastSay) lastSay=d.seq;
+    }catch(e){}
+    finally{ sayBusy=false; }
+  }
+  function talkActive(on){
+    clearInterval(sayTimer); sayTimer=null;
+    if(on && !DEMO){
+      // start from "now" so old narration doesn't dump into the chat
+      fetch('/api/say_log').then(r=>r.json()).then(d=>{ lastSay=d.seq||0; }).catch(()=>{});
+      sayTimer=setInterval(pollSay, 1200);
+    }
+  }
+  // "Talk to me" uses the ROBOT's own mic array -- phone browsers block their mic
+  // over plain HTTP. 1st tap starts recording on the robot; 2nd tap stops it, the
+  // robot transcribes (Whisper, English) and we send the text to the brain.
+  const mic=document.getElementById('mic'), micLabel=document.getElementById('micLabel');
+  let listening=false, micBusy=false;
+  async function toggleMic(){
+    if(micBusy) return;
+    if(DEMO){ listening=!listening; mic.classList.toggle('rec',listening);
+      micLabel.textContent = listening ? 'Listening… (preview)' : 'Tap and speak';
+      if(!listening) status('(preview) the robot transcribes on its own mic'); return; }
+    if(!listening){
+      micBusy=true; micLabel.textContent='Starting…';
+      const r=await api('/api/listen/start',{}); micBusy=false;
+      if(!r.ok){ micLabel.textContent=r.message||'Mic unavailable'; return; }
+      listening=true; mic.classList.add('rec'); micLabel.textContent='Listening… tap to stop';
+    }else{
+      listening=false; micBusy=true;
+      mic.classList.remove('rec'); micLabel.textContent='Thinking…';
+      const r=await api('/api/listen/stop',{}); micBusy=false;
+      micLabel.textContent='Tap and speak';
+      const text=(r.text||'').trim();
+      if(text){ document.getElementById('talkText').value=text; sendTalk(); }
+      else{ status("Didn't catch that — try again or type it"); }
+    }
+  }
+  mic.onclick=toggleMic;
+
+  function camStream(on){
+    const wrap=document.getElementById('camWrap'), img=document.getElementById('camView'),
+          off=document.getElementById('camOff');
+    if(on && !DEMO){
+      off.querySelector('span').textContent='Live view shows here on the robot';
+      img.onerror=()=>{ wrap.classList.remove('live'); img.removeAttribute('src');
+        off.querySelector('span').textContent='Camera not available'; };
+      img.src='/api/camera/stream?t='+Date.now(); wrap.classList.add('live');
+    }else{ wrap.classList.remove('live'); img.removeAttribute('src'); }   // leaving: stop the stream
+  }
+  async function takePhoto(){
+    if(DEMO){ status('(preview) photo would be saved to your phone'); return; }
+    status('Taking photo…');
+    try{
+      const blob=await (await fetch('/api/snapshot')).blob();
+      if(!blob || blob.size<100){ status('Camera not ready'); return; }
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+      a.download='walle-'+Date.now()+'.jpg'; document.body.appendChild(a); a.click();
+      a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      status('Photo saved to your phone');
+    }catch(e){ status('Could not take the photo'); }
+  }
+  let robotBusy=false;               // set by pollStatus; arm is locked while navigating
+  function armLocked(){ if(robotBusy){ status('Arm is locked while navigating.'); return true; } return false; }
+  async function armPose(p){
+    if(armLocked()) return;
+    status('Arm: '+p+'…');
+    const r=await api('/api/arm',{pose:p}); status(r.message||'');
+    if(p==='rest'){ JOINTS.forEach(j=>{ const s=document.getElementById('js'+j.id),
+      v=document.getElementById('jv'+j.id); if(s){s.value=j.val;} if(v){v.textContent=j.val;} }); }
+  }
+  // Free arm control: one slider per servo. Defaults match the 'rest'/init pose, so
+  // after tapping Rest the real arm lines up with the sliders (no sudden jump).
+  const JOINTS=[
+    {id:1,  name:'Base (rotate)', val:500},
+    {id:2,  name:'Shoulder',      val:765},
+    {id:3,  name:'Elbow',         val:15 },
+    {id:4,  name:'Wrist',         val:220},
+    {id:5,  name:'Wrist rotate',  val:500},
+    {id:10, name:'Gripper',       val:500},
+  ];
+  function renderJoints(){
+    const box=document.getElementById('joints'); if(!box) return; box.innerHTML='';
+    JOINTS.forEach(j=>{
+      const row=document.createElement('div'); row.className='joint';
+      row.innerHTML=`<label>${j.name} <span class="jval" id="jv${j.id}">${j.val}</span></label>`+
+        `<input type="range" min="0" max="1000" value="${j.val}" id="js${j.id}">`;
+      row.querySelector('input').addEventListener('input',e=>jointMove(j.id,e.target.value));
+      box.appendChild(row);
+    });
+  }
+  async function armCenter(){
+    if(armLocked()) return;
+    JOINTS.forEach(j=>{ const s=document.getElementById('js'+j.id),
+      v=document.getElementById('jv'+j.id); if(s) s.value=j.val; if(v) v.textContent=j.val; });
+    status('Resetting arm to start…');
+    const r=await api('/api/arm/center',{}); status(r.message||'');
+  }
+  let jTimer={};
+  function jointMove(id,val){
+    const lab=document.getElementById('jv'+id); if(lab) lab.textContent=val;
+    if(DEMO) return;
+    if(robotBusy){ status('Arm is locked while navigating.'); return; }
+    clearTimeout(jTimer[id]);                    // throttle: send after the drag settles
+    jTimer[id]=setTimeout(()=>api('/api/arm/joint',{id:id,pos:parseInt(val)}),90);
+  }
+  // ---- Interactive map ----
+  let MAP=null, mapMode='go', poseTimer=null, locPos=null;
+  // map zoom/pan state (own gestures — native page zoom is disabled in the viewport)
+  let mScale=1, mTx=0, mTy=0, mMoved=false, mPinchD=0, mDown=null;
+  const mPtrs=new Map();
+  function setMapMode(m){ mapMode=m; locPos=null;   // reset any half-done 'I'm here'
+    document.getElementById('modeGo').classList.toggle('on',m==='go');
+    document.getElementById('modeAdd').classList.toggle('on',m==='add');
+    document.getElementById('modeDel').classList.toggle('on',m==='del');
+    document.getElementById('modeHere').classList.toggle('on',m==='here');
+    if(m==='here') status('Tap where the robot IS on the map');
+  }
+  function w2pct(wx,wy){                       // world metres -> overlay percent
+    const px=(wx-MAP.origin_x)/MAP.resolution,
+          py=MAP.height-(wy-MAP.origin_y)/MAP.resolution;   // flip Y (ROS origin = bottom-left)
+    return {l:px/MAP.width*100, t:py/MAP.height*100}; }
+  function renderOverlay(){
+    if(!MAP) return; const ov=document.getElementById('mapOverlay'); ov.innerHTML='';
+    Object.entries(MAP.waypoints||{}).forEach(([name,p])=>{
+      if(p.x==null||p.y==null) return;
+      const c=w2pct(p.x,p.y); const d=document.createElement('div'); d.className='wp-dot';
+      d.style.left=c.l+'%'; d.style.top=c.t+'%';
+      d.innerHTML=`<span class="wp-name">${name}</span>`;
+      d.onclick=async(e)=>{e.stopPropagation(); if(mMoved) return;   // ignore taps that were pans
+        if(mapMode==='here'){ onMapTap(e); return; }   // 'I'm here' uses the tapped spot, even on a dot
+        if(mapMode==='del'){ if(!await uiConfirm('Remove "'+name+'"?', 'Remove'))return;
+          status('Removing '+name+'…'); const r=await api('/api/remove_point',{name}); status(r.message||''); loadMap(); }
+        else { if(!await uiConfirm('Go to '+name+'?', 'Go'))return;
+          status('Going to '+name+'…'); const r=await api('/api/go',{name}); status(r.message||''); } };
+      ov.appendChild(d);
+    });
+    if(MAP.pose){ const c=w2pct(MAP.pose.x,MAP.pose.y); const r=document.createElement('div');
+      r.className='robot-dot'; r.style.left=c.l+'%'; r.style.top=c.t+'%'; ov.appendChild(r); }
+  }
+  async function loadMap(){
+    const hint=document.getElementById('mapHint'), img=document.getElementById('mapImg');
+    if(DEMO){ hint.textContent='(preview) the map shows on the robot'; return; }
+    hint.style.display='flex'; hint.textContent='Loading map…';
+    try{
+      const m=await (await fetch('/api/map/meta')).json();
+      if(!m.ok){ hint.textContent='No map saved yet'; img.removeAttribute('src'); MAP=null; return; }
+      MAP=m; MAP.pose=null; mapZoomReset();
+      img.onload=()=>{ hint.style.display='none'; renderOverlay(); };
+      img.src='/api/map/img?t='+Date.now();
+    }catch(e){ hint.textContent='Could not load the map'; }
+  }
+  function onMapTap(e){
+    if(!MAP || mMoved) return;                 // ignore the click that ends a pan/pinch
+    if(e.target.closest && e.target.closest('.mapzoom-ctrl')) return;   // zoom buttons, not a map tap
+    const img=document.getElementById('mapImg'), rect=img.getBoundingClientRect();
+    const fx=(e.clientX-rect.left)/rect.width, fy=(e.clientY-rect.top)/rect.height;
+    if(fx<0||fx>1||fy<0||fy>1) return;
+    const px=fx*MAP.width, py=fy*MAP.height;
+    const wx=MAP.origin_x+px*MAP.resolution, wy=MAP.origin_y+(MAP.height-py)*MAP.resolution;
+    if(mapMode==='add'){
+      (async()=>{
+        const name=((await uiPrompt('Name this point:'))||'').trim(); if(!name) return;
+        const k=await askKnowledge(name);                    // ASK FIRST
+        if(k===null){ status('Cancelled — point not added'); return; }  // cancel -> nothing
+        status('Saving '+name+'…');
+        const r=await api('/api/add_point_at',{name:name,x:wx,y:wy});
+        status(r.message||'');
+        if(r && r.ok!==false) await saveKnowledge(name,k);   // point saved -> store what's there
+        loadMap();
+      })();
+    }else if(mapMode==='go'){
+      (async()=>{
+        if(!await uiConfirm('Send Wall-E to this spot?', 'Go')) return;
+        status('Going there…');
+        const r=await api('/api/goto',{x:wx,y:wy}); status(r.message||'');
+      })();
+    }else if(mapMode==='here'){
+      // Two taps: 1st = where the robot is, 2nd = the way it faces. Sets AMCL pose.
+      if(!locPos){
+        locPos={x:wx,y:wy};
+        status('Now tap the way the robot is FACING');
+      }else{
+        const yaw=Math.atan2(wy-locPos.y, wx-locPos.x);
+        const p={x:locPos.x, y:locPos.y, yaw:yaw}; locPos=null;
+        status('Setting my position…');
+        api('/api/set_pose',p).then(r=>{ status(r.message||''); loadMap(); });
+      }
+    }
+    // 'del' mode: nothing on empty floor -- tap a green point to remove it.
+  }
+  async function pollPose(){
+    if(!MAP) return;
+    try{ const p=await (await fetch('/api/pose')).json();
+      MAP.pose = p.ok ? {x:p.x,y:p.y} : null; renderOverlay(); }catch(e){}
+  }
+  function mapActive(on){
+    clearInterval(poseTimer); poseTimer=null;
+    if(on && !DEMO){ loadMap(); poseTimer=setInterval(pollPose,700); }
+  }
+  // ---- Map zoom + pan (pinch, drag when zoomed, and +/−/reset buttons) ----
+  function mApply(){
+    const z=document.getElementById('mapZoom'), w=document.getElementById('mapWrap'); if(!z) return;
+    z.style.transform='translate('+mTx+'px,'+mTy+'px) scale('+mScale+')';
+    if(w) w.style.touchAction = mScale>1 ? 'none' : 'manipulation';   // let the page scroll when not zoomed
+    // counter-scale the dots so they stay the same size on screen while you zoom
+    const ov=document.getElementById('mapOverlay');
+    if(ov) ov.style.setProperty('--dotscale', (1/mScale).toFixed(4));
+  }
+  function mClamp(){
+    const w=document.getElementById('mapWrap'); if(!w) return;
+    mScale=Math.max(1,Math.min(5,mScale));
+    const W=w.clientWidth, H=w.clientHeight;
+    mTx=Math.max(W*(1-mScale),Math.min(0,mTx));      // keep the map covering the viewport
+    mTy=Math.max(H*(1-mScale),Math.min(0,mTy));
+    if(mScale===1){ mTx=0; mTy=0; }
+  }
+  function mZoomAt(cx,cy,f){                          // zoom by factor f, keeping point (cx,cy) fixed
+    const contentX=(cx-mTx)/mScale, contentY=(cy-mTy)/mScale;
+    mScale=Math.max(1,Math.min(5,mScale*f));
+    mTx=cx-contentX*mScale; mTy=cy-contentY*mScale; mClamp(); mApply();
+  }
+  function mapZoomBtn(dir){ const w=document.getElementById('mapWrap'); if(!w) return;
+    mZoomAt(w.clientWidth/2, w.clientHeight/2, dir>0?1.4:1/1.4); }
+  function mapZoomReset(){ mScale=1; mTx=0; mTy=0; mApply(); }
+  (function(){
+    const w=document.getElementById('mapWrap'); if(!w) return;
+    const loc=e=>{const r=w.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top};};
+    const pts=()=>[...mPtrs.values()];
+    const dist=()=>{const [a,b]=pts(); return Math.hypot(a.x-b.x,a.y-b.y);};
+    const mid=()=>{const [a,b]=pts(); return {x:(a.x+b.x)/2,y:(a.y+b.y)/2};};
+    w.addEventListener('pointerdown',e=>{
+      mPtrs.set(e.pointerId,loc(e));
+      if(mPtrs.size===1){ mMoved=false; mDown=loc(e); }
+      else if(mPtrs.size===2){ mMoved=true; mPinchD=dist(); }
+    });
+    w.addEventListener('pointermove',e=>{
+      if(!mPtrs.has(e.pointerId)) return;
+      const prev=mPtrs.get(e.pointerId), cur=loc(e); mPtrs.set(e.pointerId,cur);
+      if(mPtrs.size>=2){
+        const d=dist(); if(mPinchD>0){ const m=mid(); mZoomAt(m.x,m.y,d/mPinchD); } mPinchD=d; mMoved=true;
+      }else if(mPtrs.size===1 && mScale>1){          // one finger drags only when zoomed in
+        mTx+=cur.x-prev.x; mTy+=cur.y-prev.y; mClamp(); mApply();
+        if(mDown && Math.hypot(cur.x-mDown.x,cur.y-mDown.y)>8) mMoved=true;
+      }
+    });
+    const end=e=>{ mPtrs.delete(e.pointerId); if(mPtrs.size<2) mPinchD=0; };
+    w.addEventListener('pointerup',end);
+    w.addEventListener('pointercancel',end);
+  })();
+  document.getElementById('mapWrap').addEventListener('click',onMapTap);
+  setMapMode('go');
+  // ---- Single-controller lock ----
+  function showLockBar(){
+    document.getElementById('ctrlMsg').textContent='Another phone is in control — you’re view-only';
+    document.getElementById('ctrlBar').classList.add('show');
+  }
+  async function refreshControl(){
+    if(DEMO) return;
+    try{
+      const s=await api('/api/control',{action:'status'});
+      const bar=document.getElementById('ctrlBar');
+      if(s.you || s.free) bar.classList.remove('show');   // you're in control, or it's free
+      else showLockBar();                                 // someone else holds it
+    }catch(e){}
+  }
+  async function takeControl(){
+    const s=await api('/api/control',{action:'take'});
+    if(s.you){ document.getElementById('ctrlBar').classList.remove('show'); status('You’re in control now'); }
+    else status('Still controlled by another phone — try again in a moment');
+  }
+  setInterval(refreshControl, 6000); refreshControl();
+
+  // ---- Live status + system health ----
+  async function pollStatus(){
+    if(DEMO) return;
+    try{
+      const s=await (await fetch('/api/status')).json();
+      robotBusy=!!s.busy;                             // arm controls lock while navigating
+      const armSec=document.getElementById('arm');
+      if(armSec){ armSec.style.opacity=robotBusy?'0.45':''; armSec.style.pointerEvents=robotBusy?'none':''; }
+      if(goingTo){                                    // clear the "Going…" tile on arrival
+        if(s.busy) goSeenBusy=true;
+        else if(goSeenBusy) setGoing(null);
+      }
+      // The switch always shows what the ROBOT says, never what this phone last clicked. Two people
+      // can be holding two phones, and the terminal can mute it too (speaker.sh). A button that
+      // shows its own last click is a button that lies the moment anyone else touches anything.
+      paintSpeaker(s.speaker, s.volume);
+      paintExpl(s.explanations);
+    }catch(e){}
+  }
+  setInterval(pollStatus, 2500); pollStatus();
+
+  // ---- the speaker switch -----------------------------------------------------------------
+  // A muted robot gives no sign of it: it still "speaks", filling this chat, with the same pauses
+  // for lines nobody can hear. So the switch goes RED and says MUTED. It is the only place a
+  // visitor -- or Rodrigo, at 2 a.m. on the day before a demo -- can see that the robot has been
+  // silenced. (demo_check.sh fails on it too, in red, which is the net under this one.)
+  let spkOn=true, spkVol=100, volSending=false;
+  function paintSpeaker(on, vol){
+    const b=document.getElementById('spk');
+    if(b && on!=null){
+      spkOn=!!on;
+      b.classList.toggle('muted', !spkOn);
+      b.innerHTML = spkOn ? '&#128266;' : '&#128263;';     // loudspeaker / muted speaker
+      b.title = spkOn ? 'Speaker volume' : 'MUTED - the robot is talking, you just cannot hear it';
+    }
+    // Keep the slider in step with the robot -- unless the finger is mid-drag, when the robot's
+    // slightly-stale reading would fight the drag and make the thumb jump.
+    if(vol!=null && !volSending){
+      spkVol=vol;
+      const r=document.getElementById('volrange'), n=document.getElementById('volnum');
+      if(r) r.value=vol;
+      if(n) n.textContent=vol+'%';
+    }
+  }
+  function toggleSpkPop(){ document.getElementById('spkpop').classList.toggle('open'); }
+  function onVol(v){                                        // slider dragged
+    v=+v;
+    document.getElementById('volnum').textContent=v+'%';
+    volSending=true;
+    clearTimeout(window._volT);
+    window._volT=setTimeout(async()=>{                     // debounce: one POST when the drag settles
+      try{
+        const r=await (await fetch('/api/speaker',{method:'POST',headers:{'Content-Type':'application/json'},
+                                                   body:JSON.stringify({vol:v})})).json();
+        paintSpeaker(r.speaker, null);
+      }catch(e){}
+      volSending=false;
+    },250);
+  }
+  async function muteQuick(){
+    document.getElementById('volrange').value=0;
+    document.getElementById('volnum').textContent='0%';
+    onVol(0);
+  }
+  let explOn=true;
+  function paintExpl(on){
+    if(on==null) return;
+    explOn=!!on;
+    const b=document.getElementById('explbtn');
+    if(!b) return;
+    b.textContent = explOn ? 'On' : 'Off';
+    b.classList.toggle('on', explOn);
+    b.classList.toggle('off', !explOn);
+  }
+  async function toggleExpl(){
+    const want=!explOn;
+    paintExpl(want);
+    try{
+      const r=await (await fetch('/api/explanations',{method:'POST',headers:{'Content-Type':'application/json'},
+                                                      body:JSON.stringify({on:want})})).json();
+      paintExpl(r.explanations);
+      if(r.message) addBubble('bot', r.message);
+    }catch(e){ pollStatus(); }
+  }
+  function qrToggle(){document.getElementById('qrdock').classList.toggle('min');}
+  function toggleHelp(){document.getElementById('helpCard').classList.toggle('hidden');}
+  async function loadQR(){
+    const img=document.getElementById('qrImg'), urlEl=document.getElementById('qrUrl'), lab=document.getElementById('qrLab');
+    if(DEMO){ lab.textContent='Scan on the robot'; urlEl.textContent='(preview) real QR shows on the robot';
+      img.style.display='none'; return; }
+    try{
+      const j=await (await fetch('/api/qr')).json();
+      if(j.img){ img.src=j.img; img.style.display='block'; } else { img.style.display='none'; }
+      urlEl.textContent=j.url||''; lab.textContent=j.img?'Scan to open on your phone':'Open this on your phone';
+    }catch(e){ img.style.display='none'; lab.textContent='QR unavailable'; }
+  }
+
+  loadPlaces(); loadQR(); renderJoints(); renderChips();
+  // "Add me" only exists if this robot actually has the forward camera and the face models.
+  // No C270, no models -> no tile, rather than a button that apologises when you press it.
+  if(!DEMO){
+    fetch('/api/face/list').then(r=>r.json()).then(d=>{
+      if(d.available) document.getElementById('faceTile').style.display='';
+    }).catch(()=>{});
+  }
+</script>
+</body>
+</html>

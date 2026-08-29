@@ -1,0 +1,15 @@
+[Unit]
+Description=Robot-DS phone web app (robot_web)
+After=NetworkManager.service start_app_node.service
+Wants=NetworkManager.service
+
+[Service]
+Type=simple
+User=ubuntu
+Restart=always
+RestartSec=5
+KillMode=mixed
+ExecStart=/bin/zsh -c 'source /home/ubuntu/.zshrc; exec python3 /home/ubuntu/Robot-DS/robot_web/server.py'
+
+[Install]
+WantedBy=multi-user.target
