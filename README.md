@@ -8,9 +8,10 @@
 **"Take me to the kitchen."** It understands you, plans a route, drives around the chair
 legs, and talks to you the whole way there.
 
-Built over ~8 weeks as a summer internship project at **Direct Supply** (Milwaukee, WI) —
-one full-time developer, part-time help from a teammate, ~$2K of off-the-shelf hardware,
-and every model running **locally on the robot**. Demoed live, end to end, no teleoperation.
+Built over ~8 weeks as a **voluntary summer project** at **Direct Supply** (Milwaukee, WI),
+in a Robotics Engineer Summer Scholar role — one developer full time, part-time help from a
+teammate, ~$2K of off-the-shelf hardware, and every model running **locally on the robot**.
+Demoed live, end to end, no teleoperation.
 
 <!-- TODO: drop the demo video or a GIF right here. It is the first thing a visitor wants. -->
 
