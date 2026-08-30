@@ -1,9 +1,24 @@
-# Robot-DS — the floor-4 guide robot
+# Robot-DS — an indoor guide robot that walks you there
 
 > **Public snapshot.** A few things are deliberately left out of this repo — the
 > office floor map, the vendor's unlicensed packages, and our remote-access details.
 > See [PUBLIC_SNAPSHOT.md](./PUBLIC_SNAPSHOT.md).
 
+
+**"Take me to the kitchen."** It understands you, plans a route, drives around the chair
+legs, and talks to you the whole way there.
+
+Built over ~8 weeks as a summer internship project at **Direct Supply** (Milwaukee, WI) —
+one full-time developer, part-time help from a teammate, ~$2K of off-the-shelf hardware,
+and every model running **locally on the robot**. Demoed live, end to end, no teleoperation.
+
+<!-- TODO: drop the demo video or a GIF right here. It is the first thing a visitor wants. -->
+
+> **Just landed here from a link?** You do not have the robot in front of you, so skip the
+> startup steps below and go straight to [what it is made of](#what-it-is-made-of), or read
+> [plan.md](./plan.md) for the whole project on one page.
+
+---
 
 A Claude-driven **indoor guide robot**. Ask it — out loud or by typing — to take you
 somewhere, and it leads you there on its own: planning its route, driving around
