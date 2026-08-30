@@ -4,7 +4,7 @@
 
 ## What this is
 
-A Claude-driven **indoor guide robot for floor 4**: on demand (by voice or the 7" touchscreen) it leads a visitor to a meeting room/office, a person/team, or an amenity — navigating autonomously and talking along the way — and can also run a guided **tour mode**. ~$2K hardware budget, ~8-week build, **primarily one full-time developer (Rodrigo)** with part-time help from Adrián, demo recorded **~2026-07-28**. It is a **floor-4 guide robot** (superseding an earlier Direct Supply senior-care *delivery* concept). Used for customer tours, hackathons, and giving our Claudes eyes and legs.
+A Claude-driven **indoor guide robot for floor 4**: on demand (by voice or the 7" touchscreen) it leads a visitor to a meeting room/office, a person/team, or an amenity — navigating autonomously and talking along the way — and can also run a guided **tour mode**. ~8-week build, **primarily one full-time developer (Rodrigo)** with part-time help from Adrián, demo recorded **~2026-07-28**. It is a **floor-4 guide robot** (superseding an earlier Direct Supply senior-care *delivery* concept). Used for customer tours, hackathons, and giving our Claudes eyes and legs.
 
 ## Where to look first
 

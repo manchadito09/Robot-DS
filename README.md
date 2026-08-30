@@ -10,7 +10,7 @@ legs, and talks to you the whole way there.
 
 Built over ~8 weeks as a **voluntary summer project** at **Direct Supply** (Milwaukee, WI),
 in a Robotics Engineer Summer Scholar role — one developer full time, part-time help from a
-teammate, ~$2K of off-the-shelf hardware, and every model running **locally on the robot**.
+teammate, off-the-shelf hardware throughout, and every model running **locally on the robot**.
 Demoed live, end to end, no teleoperation.
 
 <!-- TODO: drop the demo video or a GIF right here. It is the first thing a visitor wants. -->
